@@ -3,6 +3,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 var renderer, scene, camera, controls;
 
+function addBlock() {
+	const geometry = new THREE.BoxGeometry( 20, 20, 20 ); 
+	const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+	const cube = new THREE.Mesh( geometry, material ); 
+	scene.add( cube );
+	cube.position.x = 10;
+	cube.position.y = 10;
+	cube.position.z = 10;
+}
+
 // Create 3d Grid
 function createGrid() {
 	var gridXZ = new THREE.GridHelper(200, 10);
@@ -35,6 +45,8 @@ function init() {
 
 	createGrid();
 	
+	addBlock();
+
 	camera.position.set( 350, 225, 350 );
 }
 
