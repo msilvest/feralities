@@ -6,11 +6,12 @@
 2. Install three.js and vite
     # install
     npm install
-   
-    # three.js
-    # npm install --save three
-    # vite
-    # npm install --save-dev vite
+
+    # individual packages
+    three.js
+    npm install --save three
+    vite
+    npm install --save-dev vite
 4. Start
     # start
     npm start
