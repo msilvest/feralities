@@ -1,15 +1,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-var renderer, scene, camera, controls;
+var renderer, scene, camera, controls, cube;
 
 function addBlock() {
 	const geometry = new THREE.BoxGeometry( 20, 20, 20 ); 
 	const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-	const cube = new THREE.Mesh( geometry, material ); 
+	cube = new THREE.Mesh( geometry, material ); 
 	scene.add( cube );
 	cube.position.x = 10;
-	cube.position.y = 10;
+	cube.position.y = 190;
 	cube.position.z = 10;
 }
 
@@ -57,6 +57,10 @@ function animate() {
 	// required if controls.enableDamping or controls.autoRotate are set to true
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
+
+	if (cube.position.y > 10) {
+		cube.position.y -= 1;
+	};
 
 	renderer.render( scene, camera );
 
