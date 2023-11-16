@@ -8,9 +8,9 @@
     npm install
 
     # individual packages
-    three.js
-    npm install --save three
-    vite
+    three.js <br />
+    npm install --save three <br />
+    vite <br />
     npm install --save-dev vite
 4. Start
     # start
