@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
 var renderer, scene, camera, controls, cube;
 var on_ground = 1;
@@ -52,9 +53,9 @@ function blockGenerate() {
 
 	var type = Math.floor(Math.random()*(blockShapes.length));
 
-	blockType = type;
+	var blockType = type;
 
-	theBlockShape = [];
+	var theBlockShape = [];
 
 	for(var i = 0; i < blockShapes[type].length; i++) {
 
@@ -71,11 +72,10 @@ function blockGenerate() {
 
   		tmpGeometry.position.y = 20 * blockShapes[i].y;
 
-  		THREE.GeometryUtils.merge(geometry, tmpGeometry);
-
+		var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([geometry, tmpGeometry]);
 	}
 
-	GameManager.Box.mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, [
+	var new_mesh = createMultiMaterialObject(geometry, [
 		new THREE.MeshBasicMaterial({
 		  color: 0x000000,
 		  shading: THREE.FlatShading,
@@ -84,7 +84,61 @@ function blockGenerate() {
 		}),
 		new THREE.MeshBasicMaterial({ color: 0xfffff }),
 	  ]);
+
+	blockPosition = {x: Math.floor(0/2)-1, y: Math.floor(0/2)-1, z: 15};
+
+	new_mesh.position.x = (blockPosition.x - 0/2)*20/2;
+
+	new_mesh.position.y = (blockPosition.y - 0/2)*20/2;
+
+	new_mesh.position.z = (blockPosition.z - 0/2)*20 + 20/2;
+
+	new_mesh.overdraw = true;
+
+	scene.add(new_mesh);
+};
+
+function blockGenerate2() {
+    var geometries = [];
+
+    var type = Math.floor(Math.random() * blockShapes.length);
+    var theBlockShape = [];
+
+    for (var i = 0; i < blockShapes[type].length; i++) {
+        theBlockShape[i] = cloneVector(blockShapes[type][i]);
+    }
+
+    for (var i = 0; i < theBlockShape.length; i++) {
+        var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
+
+        tmpGeometry.translate(20 * theBlockShape[i].x, 20 * theBlockShape[i].y, 0);
+
+        geometries.push(tmpGeometry);
+    }
+
+    var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+
+    var new_mesh = createMultiMaterialObject(mergedGeometry, [
+        new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            shading: THREE.FlatShading,
+            wireframe: true,
+            transparent: true,
+        }),
+        new THREE.MeshBasicMaterial({ color: 0xfffff }),
+    ]);
+
+    var blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
+
+    new_mesh.position.x = (blockPosition.x - 0 / 2) * 20 + 20 / 2;
+    new_mesh.position.y = (blockPosition.y - 0 / 2) * 20 + 20 / 2;
+    new_mesh.position.z = (blockPosition.z - 0 / 2) * 20 + 20 / 2;
+    new_mesh.overdraw = true;
+
+    scene.add(new_mesh);
 }
+
+
 
 function createMultiMaterialObject( geometry, materials ) {
 
@@ -188,6 +242,8 @@ function animate() {
 	// 	addBlock();
 	// }
 
+	blockGenerate2();
+
 	renderer.render( scene, camera );
 
 }
@@ -198,5 +254,5 @@ function main() {
 }
 
 main()
-var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
+//var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
 
