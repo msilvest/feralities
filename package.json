@@ -4,5 +4,11 @@
   },
   "devDependencies": {
     "vite": "^5.0.0"
+  },
+  "scripts": {
+    "start": "npx vite",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   }
 }
