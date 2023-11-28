@@ -73,15 +73,15 @@ function blockGenerate() {
 
   		tmpGeometry.position.y = 20 * blockShapes[i].y;
 
-		var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([geometry, tmpGeometry]);
+		var mergedGeometry = BufferGeometryUtils.mergeGeometries([geometry, tmpGeometry]);
 	}
 
 	var new_mesh = createMultiMaterialObject(geometry, [
 		new THREE.MeshBasicMaterial({
 		  color: 0x000000,
-		  shading: THREE.FlatShading,
+		  //shading: THREE.FlatShading,
 		  wireframe: true,
-		  transparent: true,
+		  transparent: true
 		}),
 		new THREE.MeshBasicMaterial({ color: 0xfffff }),
 	  ]);
@@ -101,7 +101,7 @@ function blockGenerate() {
 
 function blockGenerate2() {
     var geometries = [];
-
+	// can do this manually since there are only so many types of blocks
     var type = Math.floor(Math.random() * blockShapes.length);
     var theBlockShape = [];
 
@@ -117,23 +117,23 @@ function blockGenerate2() {
         geometries.push(tmpGeometry);
     }
 
-    var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+    var mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
 
     var new_mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
-            shading: THREE.FlatShading,
+            //shading: THREE.FlatShading,
             wireframe: true,
-            transparent: true,
+            transparent: true
         }),
-        new THREE.MeshBasicMaterial({ color: 0xfffff }),
+        new THREE.MeshBasicMaterial({ color: 0xfffff })
     ]);
 
     var blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-
-    new_mesh.position.x = (blockPosition.x - 0 / 2) * 20 + 20 / 2;
-    new_mesh.position.y = (blockPosition.y - 0 / 2) * 20 + 20 / 2;
-    new_mesh.position.z = (blockPosition.z - 0 / 2) * 20 + 20 / 2;
+	
+    new_mesh.position.x = (blockPosition.x - 0 / 2) * 20 + 180 / 2;
+    new_mesh.position.y = (blockPosition.y - 0 / 2) * 20 + 420 / 2;
+    new_mesh.position.z = (blockPosition.z - 0 / 2) * 20 + 180 / 2;
     new_mesh.overdraw = true;
 
     scene.add(new_mesh);
@@ -238,18 +238,19 @@ function init() {
 			audioLoader.load('sounds/korobeiniki.mp3', function( buffer ) {
 				sound.setBuffer( buffer );
 				sound.setLoop( true );
-				sound.setVolume( 0.5 );
+				sound.setVolume( 0.25 );
 				sound.play();
 
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
 				document.getElementById("rotateY").style.visibility = "visible";
-				document.getElementById("dropbtn").style.visibility = "visible";
+				document.getElementById("drop").style.visibility = "visible";
 
 			});
-    }
+    	}
     started = true;
-  }
+	}
+}
 
 function animate() {
 
@@ -272,9 +273,9 @@ function animate() {
 
 	renderer.render( scene, camera );
   
-  if (inGame) {
-		alert("HELP");
-	}
+  	// if (started) {
+	// 	alert("HELP");
+	// }
 }
 
 function main() {
@@ -282,5 +283,4 @@ function main() {
 	animate();
 }
 
-main()
-//var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
+main();
