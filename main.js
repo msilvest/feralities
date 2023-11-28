@@ -5,9 +5,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 let Blocks = {};
 var renderer, scene, camera, controls, cube;
 var started = false;
-var on_ground = 1;
 Blocks.position = {};
-var theBlockShape;
 var staticBlocks = [];
 
 //var inGame = true;
@@ -51,8 +49,6 @@ Blocks.blockShapes = [
 
 ];
 
-var blockPosition = {};
-
 function blockGenerate() {
     var geometries = [];
 
@@ -84,7 +80,7 @@ function blockGenerate() {
     ]);
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-	Blocks.blockPosition = { x: 0, y: 10, z: 0 };
+	Blocks.blockPosition = { x: Math.floor(Math.random()*10), y: 10, z: Math.floor(Math.random()*10) };
 
     Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * 20 + 20 / 2;
     Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * 20 + 20 / 2;
@@ -132,16 +128,6 @@ function addStaticBlock(x,y,z) {
 	staticBlocks[x][y][z] = mesh;
 };
 
-function addBlock() {
-	const geometry = new THREE.BoxGeometry( 20, 20, 20 ); 
-	const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-	cube = new THREE.Mesh( geometry, material ); 
-	scene.add( cube );
-	cube.position.x = 10;
-	cube.position.y = 190;
-	cube.position.z = 10;
-}
-
 // Create 3d Grid
 function createGrid() {
 	var gridXZ = new THREE.GridHelper(200, 10);
@@ -176,9 +162,6 @@ function init() {
 
 	createGrid();
 	
-	//addStaticBlock(0,0,0);
-
-	//addBlock();
 	blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
@@ -248,18 +231,7 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	//if (cube.position.y > 10) {
-	 	//cube.position.y -= 1;
-	 	//on_ground = 2
-	//};
-
-	//if (on_ground == 2) {
-	 	//addBlock();
-	//}
 	moveBlock(0,-1,0);
-	//console.log(Blocks.position)
-
-	//blockGenerate2();
 
 	renderer.render( scene, camera );
   
