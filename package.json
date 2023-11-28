@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "mathjs": "^12.1.0",
     "three": "^0.158.0"
   },
   "devDependencies": {
