@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
 var renderer, scene, camera, controls, cube;
+var started = false;
 var on_ground = 1;
 var theBlockShape;
 var staticBlocks = [];
@@ -212,8 +213,10 @@ function init() {
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 	scene.add(camera);
 
-	renderer = new THREE.WebGLRenderer();
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	const canvas = document.getElementById('canvas');
+
+	renderer = new THREE.WebGLRenderer({canvas: canvas});
+	renderer.setSize( window.innerWidth, window.innerHeight*.95 );
 	document.body.appendChild( renderer.domElement );
 	
 	controls = new OrbitControls( camera, renderer.domElement );
@@ -223,7 +226,30 @@ function init() {
 	addStaticBlock(0,0,0);
 
 	camera.position.set( 350, 225, 350 );
-}
+  
+  document.getElementById("start").onclick = function() {
+		if (!started) {
+			const listener = new THREE.AudioListener();
+			camera.add( listener );
+
+			const sound = new THREE.Audio( listener );
+
+			const audioLoader = new THREE.AudioLoader();
+			audioLoader.load('sounds/korobeiniki.mp3', function( buffer ) {
+				sound.setBuffer( buffer );
+				sound.setLoop( true );
+				sound.setVolume( 0.5 );
+				sound.play();
+
+				document.getElementById("start").remove();
+				document.getElementById("rotateX").style.visibility = "visible";
+				document.getElementById("rotateY").style.visibility = "visible";
+				document.getElementById("dropbtn").style.visibility = "visible";
+
+			});
+    }
+    started = true;
+  }
 
 function animate() {
 
@@ -245,7 +271,10 @@ function animate() {
 	blockGenerate2();
 
 	renderer.render( scene, camera );
-
+  
+  if (inGame) {
+		alert("HELP");
+	}
 }
 
 function main() {
@@ -255,4 +284,3 @@ function main() {
 
 main()
 //var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
-
