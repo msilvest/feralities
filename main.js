@@ -2,19 +2,22 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
+let Blocks = {};
 var renderer, scene, camera, controls, cube;
 var started = false;
-var on_ground = 1;
-var theBlockShape;
+Blocks.position = {};
 var staticBlocks = [];
+
+//var inGame = true;
 var zColors = [
-	0x6666ff, 0x66ffff, 0xcc68EE, 0x666633, 
-	0x66ff66, 0x9966ff, 0x00ff66, 0x66EE33, 
-	0x003399, 0x330099, 0xFFA500, 0x99ff00, 
-	0xee1289, 0x71C671, 0x00BFFF, 0x666633, 
-	0x669966, 0x9966ff
+	0x00FFFF, 0x0000FF, 0xFFA500,
+	0xFFFF00, 0x00FF00, 0x800080,  
+	0xFF0000
   ];
-var blockShapes = [
+
+ // 0x6666ff, 0x66ffff,0xcc68EE, 0x66ff66, 
+
+Blocks.blockShapes = [
 	[
 		{x: 0, y: 0, z: 0},
 		{x: 1, y: 0, z: 0},
@@ -47,105 +50,53 @@ var blockShapes = [
 
 ];
 
-var blockPosition = {};
-
 function blockGenerate() {
-	var geometry, tmpGeometry;
-
-	var type = Math.floor(Math.random()*(blockShapes.length));
-
-	var blockType = type;
-
-	var theBlockShape = [];
-
-	for(var i = 0; i < blockShapes[type].length; i++) {
-
-		theBlockShape[i] = cloneVector(blockShapes[type][i]);
-
-	}
-  	geometry = new THREE.BoxGeometry(20, 20, 20);
-  
-  	for(var i = 1 ; i < theBlockShape.length; i++) {
-
-  		tmpGeometry = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20));
-
-  		tmpGeometry.position.x = 20 * blockShapes[i].x;
-
-  		tmpGeometry.position.y = 20 * blockShapes[i].y;
-
-		var mergedGeometry = BufferGeometryUtils.mergeGeometries([geometry, tmpGeometry]);
-	}
-
-	var new_mesh = createMultiMaterialObject(geometry, [
-		new THREE.MeshBasicMaterial({
-		  color: 0x000000,
-		  //shading: THREE.FlatShading,
-		  wireframe: true,
-		  transparent: true
-		}),
-		new THREE.MeshBasicMaterial({ color: 0xfffff }),
-	  ]);
-
-	blockPosition = {x: Math.floor(0/2)-1, y: Math.floor(0/2)-1, z: 15};
-
-	new_mesh.position.x = (blockPosition.x - 0/2)*20/2;
-
-	new_mesh.position.y = (blockPosition.y - 0/2)*20/2;
-
-	new_mesh.position.z = (blockPosition.z - 0/2)*20 + 20/2;
-
-	new_mesh.overdraw = true;
-
-	scene.add(new_mesh);
-};
-
-function blockGenerate2() {
     var geometries = [];
-	// can do this manually since there are only so many types of blocks
-    var type = Math.floor(Math.random() * blockShapes.length);
-    var theBlockShape = [];
 
-    for (var i = 0; i < blockShapes[type].length; i++) {
-        theBlockShape[i] = cloneVector(blockShapes[type][i]);
+    var type = Math.floor(Math.random() * Blocks.blockShapes.length);
+    Blocks.shape = [];
+
+    for (var i = 0; i < Blocks.blockShapes[type].length; i++) {
+        Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
     }
 
-    for (var i = 0; i < theBlockShape.length; i++) {
+    for (var i = 0; i < Blocks.shape.length; i++) {
         var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
 
-        tmpGeometry.translate(20 * theBlockShape[i].x, 20 * theBlockShape[i].y, 0);
+        tmpGeometry.translate(20 * Blocks.shape[i].x, 20 * Blocks.shape[i].y, 0);
 
         geometries.push(tmpGeometry);
     }
 
     var mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
 
-    var new_mesh = createMultiMaterialObject(mergedGeometry, [
+	var color = Math.floor(Math.random() * zColors.length);
+    Blocks.mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
             //shading: THREE.FlatShading,
             wireframe: true,
-            transparent: true
+            transparent: true,
         }),
-        new THREE.MeshBasicMaterial({ color: 0xfffff })
+        new THREE.MeshBasicMaterial({ color: zColors[color]}),
     ]);
 
-    var blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-	
-    new_mesh.position.x = (blockPosition.x - 0 / 2) * 20 + 180 / 2;
-    new_mesh.position.y = (blockPosition.y - 0 / 2) * 20 + 420 / 2;
-    new_mesh.position.z = (blockPosition.z - 0 / 2) * 20 + 180 / 2;
-    new_mesh.overdraw = true;
+    //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
+	Blocks.blockPosition = { x: Math.floor(Math.random()*10), y: 10, z: Math.floor(Math.random()*10) };
 
-    scene.add(new_mesh);
+    Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.overdraw = true;
+
+    scene.add(Blocks.mesh);
 }
-
-
 
 function createMultiMaterialObject( geometry, materials ) {
 
 	const group = new THREE.Group();
 
-	for ( let i = 0, l = materials.length; i < l; i++ ) {
+	for ( let i = 0; i < materials.length; i++ ) {
 		group.add( new THREE.Mesh( geometry, materials[ i ] ) );
 	}
 
@@ -163,7 +114,7 @@ function addStaticBlock(x,y,z) {
 
 	var mesh = createMultiMaterialObject(new THREE.BoxGeometry( 20, 20, 20), [
 		new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true, transparent: true}),
-		new THREE.MeshBasicMaterial({color: zColors[z]})
+		new THREE.MeshBasicMaterial({color: zColors[1]})
 	  ] );
 
 	mesh.position.x = (x - 0/2)*20 + 20/2;
@@ -178,16 +129,6 @@ function addStaticBlock(x,y,z) {
 
 	staticBlocks[x][y][z] = mesh;
 };
-
-function addBlock() {
-	const geometry = new THREE.BoxGeometry( 20, 20, 20 ); 
-	const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-	cube = new THREE.Mesh( geometry, material ); 
-	scene.add( cube );
-	cube.position.x = 10;
-	cube.position.y = 190;
-	cube.position.z = 10;
-}
 
 // Create 3d Grid
 function createGrid() {
@@ -223,7 +164,7 @@ function init() {
 
 	createGrid();
 	
-	addStaticBlock(0,0,0);
+	blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
   
@@ -238,19 +179,49 @@ function init() {
 			audioLoader.load('sounds/korobeiniki.mp3', function( buffer ) {
 				sound.setBuffer( buffer );
 				sound.setLoop( true );
-				sound.setVolume( 0.25 );
+				sound.setVolume( 0.5 );
 				sound.play();
 
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
 				document.getElementById("rotateY").style.visibility = "visible";
-				document.getElementById("drop").style.visibility = "visible";
+				//document.getElementById("dropbtn").style.visibility = "visible";
 
 			});
-    	}
+    }
     started = true;
-	}
+  }
 }
+
+function moveBlock (x,y,z) {
+
+	Blocks.mesh.position.x += x;
+	Blocks.position.x += x;
+  
+	Blocks.mesh.position.y += y;
+	Blocks.position.y += y;
+   
+	Blocks.mesh.position.z += z;
+	Blocks.position.z += z;
+  
+	if(Blocks.mesh.position.y == 10) hitBottom();
+  };
+
+function hitBottom() {
+	freeze();
+	//scene.removeObject(Blocks.mesh);
+	blockGenerate();
+  
+  };
+
+function freeze() {
+
+	var shape = Blocks.shape;
+	for(var i = 0 ; i < shape.length; i++) {
+		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
+	}
+  
+  };
 
 function animate() {
 
@@ -260,22 +231,13 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	// if (cube.position.y > 10) {
-	// 	cube.position.y -= 1;
-	// 	on_ground = 2
-	// };
-
-	// if (on_ground == 2) {
-	// 	addBlock();
-	// }
-
-	blockGenerate2();
+	moveBlock(0,-1,0);
 
 	renderer.render( scene, camera );
   
-  	// if (started) {
-	// 	alert("HELP");
-	// }
+  //if (inGame) {
+		//alert("HELP");
+	//}
 }
 
 function main() {
@@ -283,4 +245,5 @@ function main() {
 	animate();
 }
 
-main();
+main()
+//var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
