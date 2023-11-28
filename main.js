@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 var renderer, scene, camera, controls;
+var started = false;
 
 // Create 3d Grid
 function createGrid() {
@@ -22,20 +23,48 @@ function createGrid() {
 }
 
 function init() {
+
 	scene = new THREE.Scene();
 	
 	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 	scene.add(camera);
 
-	renderer = new THREE.WebGLRenderer();
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	document.body.appendChild( renderer.domElement );
+	const canvas = document.getElementById('canvas');
+
+	renderer = new THREE.WebGLRenderer({canvas: canvas});
+	renderer.setSize( window.innerWidth, window.innerHeight*.95 );
 	
 	controls = new OrbitControls( camera, renderer.domElement );
 
 	createGrid();
-	
+
 	camera.position.set( 350, 225, 350 );
+
+	document.getElementById("start").onclick = function() {
+		if (!started) {
+			const listener = new THREE.AudioListener();
+			camera.add( listener );
+		
+			const sound = new THREE.Audio( listener );
+		
+			const audioLoader = new THREE.AudioLoader();
+			audioLoader.load('sounds/korobeiniki.mp3', function( buffer ) {
+				sound.setBuffer( buffer );
+				sound.setLoop( true );
+				sound.setVolume( 0.5 );
+				sound.play();
+
+				document.getElementById("start").remove();
+				document.getElementById("rotateX").style.visibility = "visible";
+				document.getElementById("rotateY").style.visibility = "visible";
+				document.getElementById("dropbtn").style.visibility = "visible";
+
+			});
+		}
+        started = true;
+    }
+
+
 }
 
 function animate() {
@@ -47,6 +76,10 @@ function animate() {
 	controls.update();
 
 	renderer.render( scene, camera );
+
+	if (inGame) {
+		alert("HELP");
+	}
 
 }
 
