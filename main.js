@@ -10,12 +10,13 @@ var staticBlocks = [];
 
 //var inGame = true;
 var zColors = [
-	0x6666ff, 0x66ffff, 0xcc68EE, 0x666633, 
-	0x66ff66, 0x9966ff, 0x00ff66, 0x66EE33, 
-	0x003399, 0x330099, 0xFFA500, 0x99ff00, 
-	0xee1289, 0x71C671, 0x00BFFF, 0x666633, 
-	0x669966, 0x9966ff
+	0x00FFFF, 0x0000FF, 0xFFA500,
+	0xFFFF00, 0x00FF00, 0x800080,  
+	0xFF0000
   ];
+
+ // 0x6666ff, 0x66ffff,0xcc68EE, 0x66ff66, 
+
 Blocks.blockShapes = [
 	[
 		{x: 0, y: 0, z: 0},
@@ -69,6 +70,7 @@ function blockGenerate() {
 
     var mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
 
+	var color = Math.floor(Math.random() * zColors.length);
     Blocks.mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
@@ -76,7 +78,7 @@ function blockGenerate() {
             wireframe: true,
             transparent: true,
         }),
-        new THREE.MeshBasicMaterial({ color: 0xfffff }),
+        new THREE.MeshBasicMaterial({ color: zColors[color]}),
     ]);
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
@@ -112,7 +114,7 @@ function addStaticBlock(x,y,z) {
 
 	var mesh = createMultiMaterialObject(new THREE.BoxGeometry( 20, 20, 20), [
 		new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true, transparent: true}),
-		new THREE.MeshBasicMaterial({color: zColors[z]})
+		new THREE.MeshBasicMaterial({color: zColors[1]})
 	  ] );
 
 	mesh.position.x = (x - 0/2)*20 + 20/2;
@@ -202,12 +204,10 @@ function moveBlock (x,y,z) {
 	Blocks.mesh.position.z += z;
 	Blocks.position.z += z;
   
-	if(Blocks.mesh.position.y == 0) hitBottom();
-  
+	if(Blocks.mesh.position.y == 10) hitBottom();
   };
 
 function hitBottom() {
-
 	freeze();
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
