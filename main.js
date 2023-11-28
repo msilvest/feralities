@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
+let Blocks = {};
 var renderer, scene, camera, controls, cube;
 var started = false;
 var on_ground = 1;
+Blocks.position = {};
 var theBlockShape;
 var staticBlocks = [];
+
+//var inGame = true;
 var zColors = [
 	0x6666ff, 0x66ffff, 0xcc68EE, 0x666633, 
 	0x66ff66, 0x9966ff, 0x00ff66, 0x66EE33, 
@@ -14,7 +18,7 @@ var zColors = [
 	0xee1289, 0x71C671, 0x00BFFF, 0x666633, 
 	0x669966, 0x9966ff
   ];
-var blockShapes = [
+Blocks.blockShapes = [
 	[
 		{x: 0, y: 0, z: 0},
 		{x: 1, y: 0, z: 0},
@@ -50,102 +54,51 @@ var blockShapes = [
 var blockPosition = {};
 
 function blockGenerate() {
-	var geometry, tmpGeometry;
-
-	var type = Math.floor(Math.random()*(blockShapes.length));
-
-	var blockType = type;
-
-	var theBlockShape = [];
-
-	for(var i = 0; i < blockShapes[type].length; i++) {
-
-		theBlockShape[i] = cloneVector(blockShapes[type][i]);
-
-	}
-  	geometry = new THREE.BoxGeometry(20, 20, 20);
-  
-  	for(var i = 1 ; i < theBlockShape.length; i++) {
-
-  		tmpGeometry = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20));
-
-  		tmpGeometry.position.x = 20 * blockShapes[i].x;
-
-  		tmpGeometry.position.y = 20 * blockShapes[i].y;
-
-		var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([geometry, tmpGeometry]);
-	}
-
-	var new_mesh = createMultiMaterialObject(geometry, [
-		new THREE.MeshBasicMaterial({
-		  color: 0x000000,
-		  shading: THREE.FlatShading,
-		  wireframe: true,
-		  transparent: true,
-		}),
-		new THREE.MeshBasicMaterial({ color: 0xfffff }),
-	  ]);
-
-	blockPosition = {x: Math.floor(0/2)-1, y: Math.floor(0/2)-1, z: 15};
-
-	new_mesh.position.x = (blockPosition.x - 0/2)*20/2;
-
-	new_mesh.position.y = (blockPosition.y - 0/2)*20/2;
-
-	new_mesh.position.z = (blockPosition.z - 0/2)*20 + 20/2;
-
-	new_mesh.overdraw = true;
-
-	scene.add(new_mesh);
-};
-
-function blockGenerate2() {
     var geometries = [];
 
-    var type = Math.floor(Math.random() * blockShapes.length);
-    var theBlockShape = [];
+    var type = Math.floor(Math.random() * Blocks.blockShapes.length);
+    Blocks.shape = [];
 
-    for (var i = 0; i < blockShapes[type].length; i++) {
-        theBlockShape[i] = cloneVector(blockShapes[type][i]);
+    for (var i = 0; i < Blocks.blockShapes[type].length; i++) {
+        Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
     }
 
-    for (var i = 0; i < theBlockShape.length; i++) {
+    for (var i = 0; i < Blocks.shape.length; i++) {
         var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
 
-        tmpGeometry.translate(20 * theBlockShape[i].x, 20 * theBlockShape[i].y, 0);
+        tmpGeometry.translate(20 * Blocks.shape[i].x, 20 * Blocks.shape[i].y, 0);
 
         geometries.push(tmpGeometry);
     }
 
-    var mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+    var mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
 
-    var new_mesh = createMultiMaterialObject(mergedGeometry, [
+    Blocks.mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
-            shading: THREE.FlatShading,
+            //shading: THREE.FlatShading,
             wireframe: true,
             transparent: true,
         }),
         new THREE.MeshBasicMaterial({ color: 0xfffff }),
     ]);
 
-    var blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
+    //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
+	Blocks.blockPosition = { x: 0, y: 10, z: 0 };
 
-    new_mesh.position.x = (blockPosition.x - 0 / 2) * 20 + 20 / 2;
-    new_mesh.position.y = (blockPosition.y - 0 / 2) * 20 + 20 / 2;
-    new_mesh.position.z = (blockPosition.z - 0 / 2) * 20 + 20 / 2;
-    new_mesh.overdraw = true;
+    Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.overdraw = true;
 
-    scene.add(new_mesh);
+    scene.add(Blocks.mesh);
 }
-
-
 
 function createMultiMaterialObject( geometry, materials ) {
 
 	const group = new THREE.Group();
 
-	for ( let i = 0, l = materials.length; i < l; i++ ) {
+	for ( let i = 0; i < materials.length; i++ ) {
 		group.add( new THREE.Mesh( geometry, materials[ i ] ) );
 	}
 
@@ -223,7 +176,10 @@ function init() {
 
 	createGrid();
 	
-	addStaticBlock(0,0,0);
+	//addStaticBlock(0,0,0);
+
+	//addBlock();
+	blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
   
@@ -244,12 +200,45 @@ function init() {
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
 				document.getElementById("rotateY").style.visibility = "visible";
-				document.getElementById("dropbtn").style.visibility = "visible";
+				//document.getElementById("dropbtn").style.visibility = "visible";
 
 			});
     }
     started = true;
   }
+}
+
+function moveBlock (x,y,z) {
+
+	Blocks.mesh.position.x += x;
+	Blocks.position.x += x;
+  
+	Blocks.mesh.position.y += y;
+	Blocks.position.y += y;
+   
+	Blocks.mesh.position.z += z;
+	Blocks.position.z += z;
+  
+	if(Blocks.mesh.position.y == 0) hitBottom();
+  
+  };
+
+function hitBottom() {
+
+	freeze();
+	//scene.removeObject(Blocks.mesh);
+	blockGenerate();
+  
+  };
+
+function freeze() {
+
+	var shape = Blocks.shape;
+	for(var i = 0 ; i < shape.length; i++) {
+		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
+	}
+  
+  };
 
 function animate() {
 
@@ -259,22 +248,24 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	// if (cube.position.y > 10) {
-	// 	cube.position.y -= 1;
-	// 	on_ground = 2
-	// };
+	//if (cube.position.y > 10) {
+	 	//cube.position.y -= 1;
+	 	//on_ground = 2
+	//};
 
-	// if (on_ground == 2) {
-	// 	addBlock();
-	// }
+	//if (on_ground == 2) {
+	 	//addBlock();
+	//}
+	moveBlock(0,-1,0);
+	//console.log(Blocks.position)
 
-	blockGenerate2();
+	//blockGenerate2();
 
 	renderer.render( scene, camera );
   
-  if (inGame) {
-		alert("HELP");
-	}
+  //if (inGame) {
+		//alert("HELP");
+	//}
 }
 
 function main() {
