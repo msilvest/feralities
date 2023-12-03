@@ -78,9 +78,7 @@ function blockGenerate() {
 
     for (var i = 0; i < Blocks.shape.length; i++) {
         var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
-
         tmpGeometry.translate(20 * Blocks.shape[i].x, 20 * Blocks.shape[i].y, 0);
-
         geometries.push(tmpGeometry);
     }
 
@@ -109,16 +107,13 @@ function blockGenerate() {
 }
 
 function createMultiMaterialObject( geometry, materials ) {
-
 	const group = new THREE.Group();
-
 	for ( let i = 0; i < materials.length; i++ ) {
 		group.add( new THREE.Mesh( geometry, materials[ i ] ) );
 	}
 
 	return group;
-
-}
+};
 
 function cloneVector(v) {
 	return {x: v.x, y: v.y, z: v.z};
@@ -144,6 +139,7 @@ function addStaticBlock(x,y,z) {
 	scene.add(mesh);
 
 	staticBlocks[x][y][z] = mesh;
+	Board.fields[x][y][z] = Board.status.freeze;
 	//console.log(staticBlocks[x][y][z]);
 };
 
@@ -258,10 +254,23 @@ window.addEventListener('keydown', function (event) {
     }
 }, false);
 
+function isBaseFilled() {
+	for(var i = 10; i < 200; i+=10) {
+		for(var k = 10; k < 200; k+=10) {
+			if (Board.fields[i][11][k] = Board.status.empty) {
+				return false
+			}
+		}
+	}
+
+	return true;
+}
+
 function moveBlock (x,y,z) {
 	var xCheck = Blocks.mesh.position.x + x;
 	var yCheck = Blocks.mesh.position.y + y;
 	var zCheck = Blocks.mesh.position.z + z;
+
 	if(yCheck > 10) {
 		Blocks.mesh.position.y += y;
 		//Blocks.position.y += y;
@@ -290,104 +299,29 @@ function moveBlock (x,y,z) {
   };
 
   function rotateBlock(x,y,z) {
-
 	Blocks.mesh.rotation.x += x * Math.PI / 180;
-  
 	Blocks.mesh.rotation.y += y * Math.PI / 180;
-  
 	Blocks.mesh.rotation.z += z * Math.PI / 180;
-  
   };
 
 function hitBottom() {
 	freeze();
+	//console.log(Blocks.mesh.position.x,Blocks.mesh.position.y, Blocks.mesh.position.z );
+	//var answer = isBaseFilled();
+	//console.log(answer);
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
   
   };
 
-// function checkCollision() {
-// 	for(var i = 0; i < 10; i++) {
-// 		for(var j = 0; j < 10; j++) {
-// 			for(var k = 0; k < 10; k++) {
-				
-				
-// 			}
-// 		}
-// 	}
-	
-// };
-function collisionCheckAtStart (isGrounded) {
-	var x;
-	var y;
-	var z;
-	var i;
-  
-	var xPos = Blocks.position.x;
-	var yPos = Blocks.position.y;
-	var zPos = Blocks.position.z;
-	var shape = Blocks.shape;
-  
-	for (i = 0; i < shape.length; i++) {
-	  // Detection for the 4 faces of the box.
-	  if (
-		shape[i].x + xPos < 0 ||
-		shape[i].y + yPos < 0 ||
-		shape[i].x + xPos >= 10 ||
-		shape[i].y + yPos >= 10
-	  ) {
-		return collision.wall;
-	  }
-  
-	  // We store the solidified boxes in the array, in this way we can check if the box is intersecting with another box.
-	  if (
-		fields[shape[i].x + positionX][shape[i].y + positionY][
-		  shape[i].z + positionZ - 1
-		] === GameManager.Board.field.solidified
-	  ) {
-		// The collision with other boxes is detected the same way as the collision with the wall and the floor. What changes is the movement on the z axis that will hit the bottom of the box. We can use this check.
-		return isGrounded
-		  ? GameManager.Board.collision.floor
-		  : GameManager.Board.collision.wall;
-	  }
-  
-	  // Need to check if the z axis position is less or equal to 0, which means the box is grounded and should not move.
-	  if (shape[i].z + positionZ <= 0) return GameManager.Board.collision.floor;
-	}
-  };
-
 function freeze() {
-	var shape = Blocks.shape;
-	for(var i = 0 ; i < shape.length; i++) {
-		addStaticBlock(Blocks.mesh.position.x + shape[i].x, Blocks.mesh.position.y + shape[i].y, Blocks.mesh.position.z + shape[i].z);
+	//var shape = Blocks.shape;
+	//for(var i = 0 ; i < shape.length; i++) {
+		addStaticBlock(Blocks.mesh.position.x, Blocks.mesh.position.y, Blocks.mesh.position.z);
+		//console.log(Blocks.mesh.position.x,Blocks.mesh.position.y,Blocks.mesh.position.z );
 		//Board.fields[Blocks.position.x + shape[i].x][Blocks.position.y + shape[i].y][Blocks.position.z + shape[i].z] = Board.status.freeze;
-	}
-  
+	//}
   };
-
-// function freeze() {
-//     var shape = Blocks.shape;
-//     for (var i = 0; i < shape.length; i++) {
-//         var xIndex = Blocks.mesh.position.x + shape[i].x;
-//         var yIndex = Blocks.mesh.position.y + shape[i].y;
-//         var zIndex = Blocks.mesh.position.z + shape[i].z;
-
-//         console.log("Block Position:", Blocks.mesh.position);
-//         console.log("Shape:", shape[i]);
-//         console.log("Indices:", xIndex, yIndex, zIndex);
-
-//         if (
-//             xIndex >= 0 && xIndex < staticBlocks.length &&
-//             yIndex >= 0 && yIndex < staticBlocks[xIndex].length &&
-//             zIndex >= 0 && zIndex < staticBlocks[xIndex][yIndex].length
-//         ) {
-//             addStaticBlock(xIndex, yIndex, zIndex);
-//             Board.fields[xIndex][yIndex][zIndex] = Board.status.freeze;
-//         } else {
-//             console.error("Invalid indices:", xIndex, yIndex, zIndex);
-//         }
-//     }
-// }
 
 function animate() {
 
