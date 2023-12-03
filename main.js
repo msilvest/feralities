@@ -7,6 +7,7 @@ var renderer, scene, camera, controls, cube;
 var started = false;
 Blocks.position = {};
 var staticBlocks = [];
+let collision = {none:0, wall:1, ground:2};
 
 //var inGame = true;
 var zColors = [
@@ -168,7 +169,7 @@ function init() {
 
 	camera.position.set( 350, 225, 350 );
   
-  document.getElementById("start").onclick = function() {
+	document.getElementById("start").onclick = function() {
 		if (!started) {
 			const listener = new THREE.AudioListener();
 			camera.add( listener );
@@ -188,10 +189,60 @@ function init() {
 				//document.getElementById("dropbtn").style.visibility = "visible";
 
 			});
-    }
-    started = true;
+	}
+	started = true;
   }
 }
+
+window.addEventListener('keydown', function (event) {
+	console.log( event.key);
+	
+    switch (event.key) {
+        case "ArrowUp":
+            moveBlock(0, 1, 0);
+            break;
+
+        case "ArrowDown":
+            moveBlock(0, -1, 0);
+            break;
+
+        case "ArrowLeft":
+            moveBlock(-1, 0, 0);
+            break;
+
+        case "ArrowRight":
+            moveBlock(1, 0, 0);
+            break;
+
+        case " ": 
+            moveBlock(0, -1, 0 );
+            break;
+
+        case "w":
+            rotateBlock(90, 0, 0);
+            break;
+
+        case "s":
+            rotateBlock(-90, 0, 0);
+            break;
+
+        case "a":
+            rotateBlock(0, 0, 90);
+            break;
+
+        case "d":
+            rotateBlock(0, 0, -90);
+            break;
+
+        case "q":
+            rotateBlock(0, 90, 0);
+            break;
+
+        case "e":
+            rotateBlock(0, -90, 0);
+            break;
+    }
+}, false);
 
 function moveBlock (x,y,z) {
 
@@ -205,6 +256,22 @@ function moveBlock (x,y,z) {
 	Blocks.position.z += z;
   
 	if(Blocks.mesh.position.y == 10) hitBottom();
+
+	//if(staticBlocks[Blocks.mesh.position.x][Blocks.mesh.position.y][Blocks.mesh.position.z] !== undefined) {
+		//hitBottom();
+	//}
+
+	//checkCollision();
+  };
+
+  function rotateBlock(x,y,z) {
+
+	Blocks.mesh.rotation.x += x * Math.PI / 180;
+  
+	Blocks.mesh.rotation.y += y * Math.PI / 180;
+  
+	Blocks.mesh.rotation.z += z * Math.PI / 180;
+  
   };
 
 function hitBottom() {
@@ -214,14 +281,64 @@ function hitBottom() {
   
   };
 
-function freeze() {
+// function checkCollision() {
+// 	for(var i = 0; i < 10; i++) {
+// 		for(var j = 0; j < 10; j++) {
+// 			for(var k = 0; k < 10; k++) {
+				
+				
+// 			}
+// 		}
+// 	}
+	
+// };
+function collisionCheckAtStart (isGrounded) {
+	var x;
+	var y;
+	var z;
+	var i;
+  
+	var xPos = Blocks.position.x;
+	var yPos = Blocks.position.y;
+	var zPos = Blocks.position.z;
+	var shape = Blocks.shape;
+  
+	for (i = 0; i < shape.length; i++) {
+	  // Detection for the 4 faces of the box.
+	  if (
+		shape[i].x + xPos < 0 ||
+		shape[i].y + yPos < 0 ||
+		shape[i].x + xPos >= 10 ||
+		shape[i].y + yPos >= 10
+	  ) {
+		return collision.wall;
+	  }
+  
+	  // We store the solidified boxes in the array, in this way we can check if the box is intersecting with another box.
+	  if (
+		fields[shape[i].x + positionX][shape[i].y + positionY][
+		  shape[i].z + positionZ - 1
+		] === GameManager.Board.field.solidified
+	  ) {
+		// The collision with other boxes is detected the same way as the collision with the wall and the floor. What changes is the movement on the z axis that will hit the bottom of the box. We can use this check.
+		return isGrounded
+		  ? GameManager.Board.collision.floor
+		  : GameManager.Board.collision.wall;
+	  }
+  
+	  // Need to check if the z axis position is less or equal to 0, which means the box is grounded and should not move.
+	  if (shape[i].z + positionZ <= 0) return GameManager.Board.collision.floor;
+	}
+  };
 
+function freeze() {
 	var shape = Blocks.shape;
 	for(var i = 0 ; i < shape.length; i++) {
 		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
 	}
   
   };
+
 
 function animate() {
 
