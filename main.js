@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-let Blocks = {};
+var Blocks = {};
 var renderer, scene, camera, controls, cube;
 var blockSpeed = -0.125;
 var started = false;
 Blocks.position = {};
-var staticBlocks = [];
+var staticBlocks = Array(10).fill().map(() => Array(10).fill(0));
 
 //var inGame = true;
 var zColors = [
@@ -56,12 +56,13 @@ function blockGenerate() {
 
     var type = Math.floor(Math.random() * Blocks.blockShapes.length);
     Blocks.shape = [];
+	Blocks.type = type;
 
-    for (var i = 0; i < Blocks.blockShapes[type].length; i++) {
+    for ( let i = 0; i < Blocks.blockShapes[type].length; i++ ) {
         Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
     }
 
-    for (var i = 0; i < Blocks.shape.length; i++) {
+    for ( let i = 0; i < Blocks.shape.length; i++ ) {
         var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
 
         tmpGeometry.translate(20 * Blocks.shape[i].x, 20 * Blocks.shape[i].y, 0);
@@ -75,7 +76,7 @@ function blockGenerate() {
     Blocks.mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
-            //shading: THREE.FlatShading,
+            shading: THREE.FlatShading,
             wireframe: true,
             transparent: true,
         }),
@@ -83,12 +84,12 @@ function blockGenerate() {
     ]);
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-	Blocks.blockPosition = { x: Math.floor(Math.random()*10), y: 10, z: Math.floor(Math.random()*10) };
+	Blocks.position = { x: Math.floor(Math.random()*10), y: 10, z: Math.floor(Math.random()*10) };
 
-    Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.overdraw = true;
+    Blocks.mesh.position.x = (Blocks.position.x - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.y = (Blocks.position.y - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.position.z = (Blocks.position.z - 0 / 2) * 20 + 20 / 2;
+    Blocks.mesh.overdraw = false;
 
     scene.add(Blocks.mesh);
 }
@@ -109,7 +110,14 @@ function cloneVector(v) {
 	return {x: v.x, y: v.y, z: v.z};
 };
 
+function roundVector(v) {
+	v.x = Math.round(v.x);
+	v.y = Math.round(v.y);
+	v.z = Math.round(v.z);
+}
+
 function addStaticBlock(x,y,z) {
+	console.log(x, y, z);
 	if(staticBlocks[x] === undefined) staticBlocks[x] = [];
 	if(staticBlocks[x][y] === undefined) staticBlocks[x][y] = [];
 
@@ -184,17 +192,57 @@ function init() {
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
 				document.getElementById("rotateY").style.visibility = "visible";
-				//document.getElementById("dropbtn").style.visibility = "visible";
-
+				document.getElementById("rotateZ").style.visibility = "visible";
+				document.getElementById("moveLeft").style.visibility = "visible";
+				document.getElementById("moveRight").style.visibility = "visible";
+				document.getElementById("moveUp").style.visibility = "visible";
+				document.getElementById("moveDown").style.visibility = "visible";
+				document.getElementById("softDrop").style.visibility = "visible";
+				document.getElementById("hardDrop").style.visibility = "visible";
 			});
     }
     started = true;
 	blockGenerate();
   }
+
+  document.getElementById("rotateX").onclick = function() {
+	rotate(90, 0, 0);
+  }
+
+  document.getElementById("rotateY").onclick = function() {
+	rotate(0, 90, 0);
+  }
+
+  document.getElementById("rotateZ").onclick = function() {
+	rotate(0, 0, 90);
+  }
+
+  document.getElementById("moveLeft").onclick = function() {
+	move(-20, 0, 0);
+  }
+
+  document.getElementById("moveRight").onclick = function() {
+	move(20, 0, 0);
+  }
+
+  document.getElementById("moveUp").onclick = function() {
+	move(0, 0, 20);
+  }
+
+  document.getElementById("moveDown").onclick = function() {
+	move(0, 0, -20);
+  }
+
+  document.getElementById("softDrop").onclick = function() {
+	move(0, -20, 0);
+  }
+
+  document.getElementById("hardDrop").onclick = function() {
+	move(0, -1000, 0);
+  }
 }
 
-function moveBlock (x,y,z) {
-
+function move (x, y, z) {
 	Blocks.mesh.position.x += x;
 	Blocks.position.x += x;
   
@@ -204,38 +252,46 @@ function moveBlock (x,y,z) {
 	Blocks.mesh.position.z += z;
 	Blocks.position.z += z;
   
-	if(Blocks.mesh.position.y == 10) hitBottom();
-  };
+	if(Blocks.mesh.position.y <= 10) {
+		Blocks.mesh.position.y = 10;
+		hitBottom();
+	}
+};
 
 function hitBottom() {
 	freeze();
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
-  };
+	blockSpeed *= 1.1;
+};
 
 function freeze() {
-	var shape = Blocks.shape;
-	for(var i = 0 ; i < shape.length; i++) {
-		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
+	for ( let i = 0 ; i < Blocks.shape.length; i++ ) {
+		addStaticBlock(Blocks.position.x + Blocks.shape[i].x, Blocks.position.y + Blocks.shape[i].y, Blocks.position.z + Blocks.shape[i].z);
 	}
   
-  };
+};
+
+function rotate(x, y, z) {
+	Blocks.mesh.rotation.x += (x * Math.PI) / 180;
+	Blocks.mesh.rotation.y += (y * Math.PI) / 180;
+	Blocks.mesh.rotation.z += (z * Math.PI) / 180;
+
+	// need to cancel the rotate if the rotate collides with a block or a wall, but we don't have the code for collision checking
+	// rotate(-x, -y, -z);
+}
+
 
 function animate() {
-
 	requestAnimationFrame( animate );
 
 	// required if controls.enableDamping or controls.autoRotate are set to true
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	moveBlock(0, blockSpeed, 0);
+	move(0, blockSpeed, 0);
 
 	renderer.render( scene, camera );
-  
-  //if (inGame) {
-		//alert("HELP");
-	//}
 }
 
 function main() {
