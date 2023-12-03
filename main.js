@@ -5,9 +5,12 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 let Blocks = {};
 var renderer, scene, camera, controls, cube;
 var started = false;
-Blocks.position = {};
+//Blocks.position = {x: 0, y: 0, z: 0};
 var staticBlocks = [];
-let collision = {none:0, wall:1, ground:2};
+let Board = {};
+Board.collision = {none:0, wall:1, ground:2};
+Board.status = {empty:0, active:1, frozen:2};
+Board.fields = [];
 
 //var inGame = true;
 var zColors = [
@@ -50,6 +53,18 @@ Blocks.blockShapes = [
 	]
 
 ];
+
+function initBoard(x,y,z) {
+    for(var i = 0; i < x; i++) {
+        Board.fields[i] = [];
+        for(var j = 0; j < y; j++) {
+            Board.fields[i][j] = [];
+            for(var k = 0; k < z; k++) {
+                Board.fields[i][j][k] = Board.status.empty;
+            }
+        }
+    }
+};
 
 function blockGenerate() {
     var geometries = [];
@@ -129,6 +144,7 @@ function addStaticBlock(x,y,z) {
 	scene.add(mesh);
 
 	staticBlocks[x][y][z] = mesh;
+	//console.log(staticBlocks[x][y][z]);
 };
 
 // Create 3d Grid
@@ -165,6 +181,8 @@ function init() {
 
 	createGrid();
 	
+	initBoard(200, 200, 200);
+
 	blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
@@ -195,27 +213,23 @@ function init() {
 }
 
 window.addEventListener('keydown', function (event) {
-	console.log( event.key);
+	console.log( event.key );
 	
     switch (event.key) {
-        case "ArrowUp":
-            moveBlock(0, 1, 0);
-            break;
-
         case "ArrowDown":
-            moveBlock(0, -1, 0);
+            moveBlock(0, -10, 0);
             break;
 
         case "ArrowLeft":
-            moveBlock(-1, 0, 0);
+            moveBlock(-20, 0, 0);
             break;
 
         case "ArrowRight":
-            moveBlock(1, 0, 0);
+            moveBlock(20, 0, 0);
             break;
 
         case " ": 
-            moveBlock(0, -1, 0 );
+            moveBlock(0, -10, 0 );
             break;
 
         case "w":
@@ -245,17 +259,28 @@ window.addEventListener('keydown', function (event) {
 }, false);
 
 function moveBlock (x,y,z) {
+	var xCheck = Blocks.mesh.position.x + x;
+	var yCheck = Blocks.mesh.position.y + y;
+	var zCheck = Blocks.mesh.position.z + z;
+	if(yCheck > 10) {
+		Blocks.mesh.position.y += y;
+		//Blocks.position.y += y;
+	} 
+	else {
+		hitBottom();
+	}
 
-	Blocks.mesh.position.x += x;
-	Blocks.position.x += x;
+	if (xCheck > 0 && xCheck < 200) {		
+		Blocks.mesh.position.x += x;
+		//Blocks.position.x += x;
+	}
+
+	if (zCheck < 200 && zCheck > 0) {
+		Blocks.mesh.position.z += z;
+		//Blocks.position.z += z;
+	}
   
-	Blocks.mesh.position.y += y;
-	Blocks.position.y += y;
-   
-	Blocks.mesh.position.z += z;
-	Blocks.position.z += z;
-  
-	if(Blocks.mesh.position.y == 10) hitBottom();
+	//if(Blocks.mesh.position.y <= 10) hitBottom();
 
 	//if(staticBlocks[Blocks.mesh.position.x][Blocks.mesh.position.y][Blocks.mesh.position.z] !== undefined) {
 		//hitBottom();
@@ -334,11 +359,35 @@ function collisionCheckAtStart (isGrounded) {
 function freeze() {
 	var shape = Blocks.shape;
 	for(var i = 0 ; i < shape.length; i++) {
-		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
+		addStaticBlock(Blocks.mesh.position.x + shape[i].x, Blocks.mesh.position.y + shape[i].y, Blocks.mesh.position.z + shape[i].z);
+		//Board.fields[Blocks.position.x + shape[i].x][Blocks.position.y + shape[i].y][Blocks.position.z + shape[i].z] = Board.status.freeze;
 	}
   
   };
 
+// function freeze() {
+//     var shape = Blocks.shape;
+//     for (var i = 0; i < shape.length; i++) {
+//         var xIndex = Blocks.mesh.position.x + shape[i].x;
+//         var yIndex = Blocks.mesh.position.y + shape[i].y;
+//         var zIndex = Blocks.mesh.position.z + shape[i].z;
+
+//         console.log("Block Position:", Blocks.mesh.position);
+//         console.log("Shape:", shape[i]);
+//         console.log("Indices:", xIndex, yIndex, zIndex);
+
+//         if (
+//             xIndex >= 0 && xIndex < staticBlocks.length &&
+//             yIndex >= 0 && yIndex < staticBlocks[xIndex].length &&
+//             zIndex >= 0 && zIndex < staticBlocks[xIndex][yIndex].length
+//         ) {
+//             addStaticBlock(xIndex, yIndex, zIndex);
+//             Board.fields[xIndex][yIndex][zIndex] = Board.status.freeze;
+//         } else {
+//             console.error("Invalid indices:", xIndex, yIndex, zIndex);
+//         }
+//     }
+// }
 
 function animate() {
 
