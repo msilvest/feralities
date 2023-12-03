@@ -4,6 +4,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 
 let Blocks = {};
 var renderer, scene, camera, controls, cube;
+var blockSpeed = -0.125;
 var started = false;
 Blocks.position = {};
 var staticBlocks = [];
@@ -163,8 +164,6 @@ function init() {
 	controls = new OrbitControls( camera, renderer.domElement );
 
 	createGrid();
-	
-	blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
   
@@ -190,6 +189,7 @@ function init() {
 			});
     }
     started = true;
+	blockGenerate();
   }
 }
 
@@ -211,11 +211,9 @@ function hitBottom() {
 	freeze();
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
-  
   };
 
 function freeze() {
-
 	var shape = Blocks.shape;
 	for(var i = 0 ; i < shape.length; i++) {
 		addStaticBlock(Blocks.position.x + shape[i].x, Blocks.position.y + shape[i].y, Blocks.position.z + shape[i].z);
@@ -231,7 +229,7 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	moveBlock(0,-1,0);
+	moveBlock(0, blockSpeed, 0);
 
 	renderer.render( scene, camera );
   
