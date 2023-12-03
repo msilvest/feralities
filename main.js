@@ -8,8 +8,8 @@ var started = false;
 //Blocks.position = {x: 0, y: 0, z: 0};
 var staticBlocks = [];
 let Board = {};
-Board.collision = {none:0, wall:1, ground:2};
-Board.status = {empty:0, active:1, frozen:2};
+//Board.collision = {none:0, wall:1, ground:2};
+//Board.status = {empty:0, active:1, frozen:2};
 Board.fields = [];
 
 //var inGame = true;
@@ -60,7 +60,7 @@ function initBoard(x,y,z) {
         for(var j = 0; j < y; j++) {
             Board.fields[i][j] = [];
             for(var k = 0; k < z; k++) {
-                Board.fields[i][j][k] = Board.status.empty;
+                Board.fields[i][j][k] = 0;
             }
         }
     }
@@ -138,9 +138,12 @@ function addStaticBlock(x,y,z) {
 
 	scene.add(mesh);
 
+	//console.log(x,y,z);
 	staticBlocks[x][y][z] = mesh;
-	Board.fields[x][y][z] = Board.status.freeze;
-	//console.log(staticBlocks[x][y][z]);
+	//console.log(Board.fields[x][y][z]);
+	Board.fields[x][y][z] = 2;
+	//console.log(Board.fields[x][y][z]);
+	//console.log(Board.fields[x][y][z]);
 };
 
 // Create 3d Grid
@@ -209,7 +212,7 @@ function init() {
 }
 
 window.addEventListener('keydown', function (event) {
-	console.log( event.key );
+	//console.log( event.key );
 	
     switch (event.key) {
         case "ArrowDown":
@@ -255,9 +258,12 @@ window.addEventListener('keydown', function (event) {
 }, false);
 
 function isBaseFilled() {
-	for(var i = 10; i < 200; i+=10) {
-		for(var k = 10; k < 200; k+=10) {
-			if (Board.fields[i][11][k] = Board.status.empty) {
+	for(var i = 0; i < 10; i++) {
+		for(var k = 0; k < 10; k++) {
+			//console.log(Board.fields[i][0][k]);
+			//console.log(i, k);
+			if (Board.fields[i][0][k] == 0) {
+				//console.log(Board.fields[i][0][k]);
 				return false
 			}
 		}
@@ -347,3 +353,18 @@ function main() {
 
 main()
 //var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
+for(var i = 0; i < 10; i++) {
+	for (var j = 0; j < 10; j++) {
+		addStaticBlock(i,0,j);
+		//console.log(staticBlocks[i][0][j]);
+	}
+}
+//console.log(Board.fields[0][0][1]);
+
+var x = isBaseFilled();
+console.log(x);
+
+// addStaticBlock(0,0,0);
+// addStaticBlock(1,0,0);
+// addStaticBlock(0,0,1);
+// addStaticBlock(1,0,1);
