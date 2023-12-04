@@ -13,6 +13,8 @@ let Board = {};
 Board.fields = [];
 var blockSize = 20;
 var divisions = 10;
+var storeBlock;
+var usedStore = false;
 
 //var inGame = true;
 var zColors = [
@@ -100,13 +102,12 @@ function blockGenerate() {
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
 	Blocks.blockPosition = { x: Math.floor(Math.random()*divisions), y: divisions, z: Math.floor(Math.random()*divisions) };
+	Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * blockSize + blockSize / 2;
+	Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * blockSize + blockSize / 2;
+	Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * blockSize + blockSize / 2;
+	Blocks.mesh.overdraw = true;
 
-    Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * blockSize + blockSize / 2;
-    Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * blockSize + blockSize / 2;
-    Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * blockSize + blockSize / 2;
-    Blocks.mesh.overdraw = true;
-
-    scene.add(Blocks.mesh);
+	scene.add(Blocks.mesh);
 }
 
 function createMultiMaterialObject( geometry, materials ) {
@@ -215,6 +216,7 @@ function init() {
 				document.getElementById("moveDown").style.visibility = "visible";
 				document.getElementById("softDrop").style.visibility = "visible";
 				document.getElementById("hardDrop").style.visibility = "visible";
+				document.getElementById("store").style.visibility = "visible";
 			});
     }
     started = true;
@@ -247,6 +249,10 @@ function init() {
 
   document.getElementById("hardDrop").onclick = function() {
 	move(0, -1000, 0);
+  }
+
+  document.getElementById("store").onclick = function() {
+	store();
   }
 }
 
@@ -297,6 +303,10 @@ window.addEventListener('keydown', function (event) {
         case "e":
             rotate(0, -90, 0);
             break;
+
+		case "r":
+			store();
+			break;
     }
 }, false);
 
@@ -357,6 +367,7 @@ function hitBottom() {
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
 	blockSpeed *= 1.01;
+	usedStore = false;
   
   };
 
@@ -371,6 +382,39 @@ function freeze() {
 		//Board.fields[Blocks.position.x + shape[i].x][Blocks.position.y + shape[i].y][Blocks.position.z + shape[i].z] = Board.status.freeze;
 	//}
   };
+
+function store() {
+
+	if (usedStore) {
+		return;
+	}
+
+	if (storeBlock) {
+		scene.remove(Blocks.mesh);
+		let temp = storeBlock.clone();
+		storeBlock = Blocks.mesh.clone();
+		//let temp = JSON.parse(JSON.stringify(storeBlock));
+		//let blockPos = JSON.parse(JSON.stringify(Blocks.mesh.position));
+		//storeBlock = JSON.parse(JSON.stringify(Blocks.mesh));
+		Blocks.mesh = temp.clone();
+		scene.add(Blocks.mesh);
+		Blocks.mesh.position.x = storeBlock.position.x;
+		Blocks.mesh.position.y = storeBlock.position.y;
+		Blocks.mesh.position.z = storeBlock.position.z;
+		}
+	else {
+		scene.remove(Blocks.mesh);
+		storeBlock = Blocks.mesh.clone();
+		//let blockPos = JSON.parse(JSON.stringify(Blocks.mesh.position));
+		//storeBlock = JSON.parse(JSON.stringify(Blocks.mesh));
+		blockGenerate();
+		Blocks.mesh.position.x = storeBlock.position.x;
+		Blocks.mesh.position.y = storeBlock.position.y;
+		Blocks.mesh.position.z = storeBlock.position.z;
+	}
+
+	usedStore = true;
+}
 
 function animate() {
 
