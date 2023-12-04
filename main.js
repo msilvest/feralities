@@ -6,6 +6,7 @@ var Blocks = {};
 var renderer, scene, camera, controls, cube;
 var blockSpeed = -0.125;
 var started = false;
+
 //Blocks.position = {};
 var staticBlocks = [];
 //var staticBlocks = Array(10).fill().map(() => Array(10).fill(0));
@@ -75,7 +76,7 @@ function blockGenerate() {
     Blocks.shape = [];
 	Blocks.type = type;
 
-    for (var i = 0; i < Blocks.blockShapes[type].length; i++) {
+    for ( let i = 0; i < Blocks.blockShapes[type].length; i++ ) {
         Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
     }
 
@@ -91,7 +92,7 @@ function blockGenerate() {
     Blocks.mesh = createMultiMaterialObject(mergedGeometry, [
         new THREE.MeshBasicMaterial({
             color: 0x000000,
-            //shading: THREE.FlatShading,
+            shading: THREE.FlatShading,
             wireframe: true,
             transparent: true,
         }),
@@ -99,7 +100,7 @@ function blockGenerate() {
     ]);
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-	Blocks.blockPosition = { x: Math.floor(Math.random()*divisions), y: divisions, z: Math.floor(Math.random()*divisions) };
+	  Blocks.blockPosition = { x: Math.floor(Math.random()*divisions), y: divisions, z: Math.floor(Math.random()*divisions) };
 
     Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * blockSize + blockSize / 2;
     Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * blockSize + blockSize / 2;
@@ -129,6 +130,7 @@ function roundVector(v) {
 };
 
 function addStaticBlock(x,y,z) {
+	console.log(x, y, z);
 	if(staticBlocks[x] === undefined) staticBlocks[x] = [];
 	if(staticBlocks[x][y] === undefined) staticBlocks[x][y] = [];
 
@@ -248,7 +250,6 @@ function init() {
   document.getElementById("hardDrop").onclick = function() {
 	move(0, -1000, 0);
   }
-}
 
 window.addEventListener('keydown', function (event) {
 	//console.log( event.key );
@@ -371,6 +372,7 @@ function freeze() {
 	for ( let i = 0 ; i < Blocks.shape.length; i++ ) {
 		addStaticBlock(Blocks.position.x + Blocks.shape[i].x, Blocks.position.y + Blocks.shape[i].y, Blocks.position.z + Blocks.shape[i].z);
 	}
+
 	//var shape = Blocks.shape;
 	//for(var i = 0 ; i < shape.length; i++) {
 		//addStaticBlock(Blocks.mesh.position.x, Blocks.mesh.position.y, Blocks.mesh.position.z);
@@ -379,8 +381,17 @@ function freeze() {
 	//}
   };
 
-function animate() {
+function rotate(x, y, z) {
+	Blocks.mesh.rotation.x += (x * Math.PI) / 180;
+	Blocks.mesh.rotation.y += (y * Math.PI) / 180;
+	Blocks.mesh.rotation.z += (z * Math.PI) / 180;
 
+	// need to cancel the rotate if the rotate collides with a block or a wall, but we don't have the code for collision checking
+	// rotate(-x, -y, -z);
+}
+
+
+function animate() {
 	requestAnimationFrame( animate );
 
 	// required if controls.enableDamping or controls.autoRotate are set to true
@@ -390,10 +401,6 @@ function animate() {
 	move(0,blockSpeed,0);
 
 	renderer.render( scene, camera );
-  
-  //if (inGame) {
-		//alert("HELP");
-	//}
 }
 
 function main() {
