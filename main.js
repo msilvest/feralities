@@ -2,17 +2,17 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-let Blocks = {};
+var Blocks = {};
 var renderer, scene, camera, controls, cube;
+var blockSpeed = -0.125;
 var started = false;
-//Blocks.position = {x: 0, y: 0, z: 0};
+//Blocks.position = {};
 var staticBlocks = [];
+//var staticBlocks = Array(10).fill().map(() => Array(10).fill(0));
 let Board = {};
-//Board.collision = {none:0, wall:1, ground:2};
-//Board.status = {empty:0, active:1, frozen:2};
 Board.fields = [];
-var blockSize = 40;
-var divisions = 5;
+var blockSize = 20;
+var divisions = 10;
 
 //var inGame = true;
 var zColors = [
@@ -73,6 +73,7 @@ function blockGenerate() {
 
     var type = Math.floor(Math.random() * Blocks.blockShapes.length);
     Blocks.shape = [];
+	Blocks.type = type;
 
     for (var i = 0; i < Blocks.blockShapes[type].length; i++) {
         Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
@@ -111,7 +112,7 @@ function blockGenerate() {
 function createMultiMaterialObject( geometry, materials ) {
 	const group = new THREE.Group();
 	for ( let i = 0; i < materials.length; i++ ) {
-		group.add( new THREE.Mesh( geometry, materials[ i ] ) );
+		group.add( new THREE.Mesh( geometry, materials[i] ) );
 	}
 
 	return group;
@@ -119,6 +120,12 @@ function createMultiMaterialObject( geometry, materials ) {
 
 function cloneVector(v) {
 	return {x: v.x, y: v.y, z: v.z};
+};
+
+function roundVector(v) {
+	v.x = Math.round(v.x);
+	v.y = Math.round(v.y);
+	v.z = Math.round(v.z);
 };
 
 function addStaticBlock(x,y,z) {
@@ -140,12 +147,8 @@ function addStaticBlock(x,y,z) {
 
 	scene.add(mesh);
 
-	//console.log(x,y,z);
 	staticBlocks[x][y][z] = mesh;
-	//console.log(Board.fields[x][y][z]);
-	Board.fields[x][y][z] = 2;
-	//console.log(Board.fields[x][y][z]);
-	//console.log(Board.fields[x][y][z]);
+	//Board.fields[x][y][z] = 2;
 };
 
 // Create 3d Grid
@@ -162,7 +165,6 @@ function createGrid() {
 	var gridYZ = new THREE.GridHelper(200, divisions);
 	gridYZ.position.set( 0,100,100 );
 	gridYZ.rotation.z = Math.PI/2;
-
 	scene.add(gridYZ);
 }
 
@@ -184,7 +186,7 @@ function init() {
 	
 	initBoard(200, 200, 200);
 
-	blockGenerate();
+	//blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
 	//camera.position.set( 400, 150, 400 );
@@ -206,11 +208,45 @@ function init() {
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
 				document.getElementById("rotateY").style.visibility = "visible";
-				//document.getElementById("dropbtn").style.visibility = "visible";
-
+				document.getElementById("rotateZ").style.visibility = "visible";
+				document.getElementById("moveLeft").style.visibility = "visible";
+				document.getElementById("moveRight").style.visibility = "visible";
+				document.getElementById("moveUp").style.visibility = "visible";
+				document.getElementById("moveDown").style.visibility = "visible";
+				document.getElementById("softDrop").style.visibility = "visible";
+				document.getElementById("hardDrop").style.visibility = "visible";
 			});
-	}
-	started = true;
+    }
+    started = true;
+	blockGenerate();
+  }
+
+  document.getElementById("rotateZ").onclick = function() {
+	rotate(0, 0, 90);
+  }
+
+  document.getElementById("moveLeft").onclick = function() {
+	move(-1*blockSize, 0, 0);
+  }
+
+  document.getElementById("moveRight").onclick = function() {
+	move(blockSize, 0, 0);
+  }
+
+  document.getElementById("moveUp").onclick = function() {
+	move(0, 0, blockSize);
+  }
+
+  document.getElementById("moveDown").onclick = function() {
+	move(0, 0, -1*blockSize);
+  }
+
+  document.getElementById("softDrop").onclick = function() {
+	move(0, -1*blockSize, 0);
+  }
+
+  document.getElementById("hardDrop").onclick = function() {
+	move(0, -1000, 0);
   }
 }
 
@@ -218,44 +254,48 @@ window.addEventListener('keydown', function (event) {
 	//console.log( event.key );
 	
     switch (event.key) {
+		case "ArrowUp":
+            move(0, 0, -1*blockSize);
+            break;
+
         case "ArrowDown":
-            moveBlock(0, -1*divisions, 0);
+            move(0, 0, blockSize);
             break;
 
         case "ArrowLeft":
-            moveBlock(-1*blockSize, 0, 0);
+            move(-1*blockSize, 0, 0);
             break;
 
         case "ArrowRight":
-            moveBlock(blockSize, 0, 0);
+            move(blockSize, 0, 0);
             break;
 
         case " ": 
-            moveBlock(0, -1*divisions, 0 );
+            move(0, -1*divisions, 0 );
             break;
 
         case "w":
-            rotateBlock(90, 0, 0);
+            rotate(90, 0, 0);
             break;
 
         case "s":
-            rotateBlock(-90, 0, 0);
+            rotate(-90, 0, 0);
             break;
 
         case "a":
-            rotateBlock(0, 0, 90);
+            rotate(0, 0, 90);
             break;
 
         case "d":
-            rotateBlock(0, 0, -90);
+            rotate(0, 0, -90);
             break;
 
         case "q":
-            rotateBlock(0, 90, 0);
+            rotate(0, 90, 0);
             break;
 
         case "e":
-            rotateBlock(0, -90, 0);
+            rotate(0, -90, 0);
             break;
     }
 }, false);
@@ -275,7 +315,7 @@ function isBaseFilled() {
 	return true;
 }
 
-function moveBlock (x,y,z) {
+function move (x,y,z) {
 	var xCheck = Blocks.mesh.position.x + x;
 	var yCheck = Blocks.mesh.position.y + y;
 	var zCheck = Blocks.mesh.position.z + z;
@@ -307,10 +347,13 @@ function moveBlock (x,y,z) {
 	//checkCollision();
   };
 
-  function rotateBlock(x,y,z) {
+  function rotate(x,y,z) {
 	Blocks.mesh.rotation.x += x * Math.PI / 180;
 	Blocks.mesh.rotation.y += y * Math.PI / 180;
 	Blocks.mesh.rotation.z += z * Math.PI / 180;
+
+	// need to cancel the rotate if the rotate collides with a block or a wall, but we don't have the code for collision checking
+	// rotate(-x, -y, -z);
   };
 
 function hitBottom() {
@@ -320,13 +363,17 @@ function hitBottom() {
 	//console.log(answer);
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
+	blockSpeed *= 1.01;
   
   };
 
 function freeze() {
+	for ( let i = 0 ; i < Blocks.shape.length; i++ ) {
+		addStaticBlock(Blocks.position.x + Blocks.shape[i].x, Blocks.position.y + Blocks.shape[i].y, Blocks.position.z + Blocks.shape[i].z);
+	}
 	//var shape = Blocks.shape;
 	//for(var i = 0 ; i < shape.length; i++) {
-		addStaticBlock(Blocks.mesh.position.x, Blocks.mesh.position.y, Blocks.mesh.position.z);
+		//addStaticBlock(Blocks.mesh.position.x, Blocks.mesh.position.y, Blocks.mesh.position.z);
 		//console.log(Blocks.mesh.position.x,Blocks.mesh.position.y,Blocks.mesh.position.z );
 		//Board.fields[Blocks.position.x + shape[i].x][Blocks.position.y + shape[i].y][Blocks.position.z + shape[i].z] = Board.status.freeze;
 	//}
@@ -340,7 +387,7 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	moveBlock(0,-1,0);
+	move(0,blockSpeed,0);
 
 	renderer.render( scene, camera );
   
