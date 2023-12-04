@@ -322,29 +322,22 @@ function move (x,y,z) {
 
 	if(yCheck > (blockSize / 2)) {
 		Blocks.mesh.position.y += y;
-		//Blocks.position.y += y;
+		Blocks.position.y += y;
 	} 
 	else {
+		Blocks.mesh.position.y = 10;
 		hitBottom();
 	}
 
 	if (xCheck > 0 && xCheck < 200) {		
 		Blocks.mesh.position.x += x;
-		//Blocks.position.x += x;
+		Blocks.position.x += x;
 	}
 
 	if (zCheck < 200 && zCheck > 0) {
 		Blocks.mesh.position.z += z;
-		//Blocks.position.z += z;
+		Blocks.position.z += z;
 	}
-  
-	//if(Blocks.mesh.position.y <= 10) hitBottom();
-
-	//if(staticBlocks[Blocks.mesh.position.x][Blocks.mesh.position.y][Blocks.mesh.position.z] !== undefined) {
-		//hitBottom();
-	//}
-
-	//checkCollision();
   };
 
   function rotate(x,y,z) {
