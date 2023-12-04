@@ -8,6 +8,7 @@ var staticBlocks = [];
 var blockSize = 20;
 var blockSpeed = -1;
 var divisions = 10;
+var score = 0;
 
 var zColors = [
 	0x00FFFF, 0x0000FF, 0xFFA500,
@@ -19,7 +20,6 @@ var times = {};
 times.stepTime = 1000;
 times.frameTime = 0;
 times.currFrameTime = 0;
-times.lastFrameTime = Date.now();
 
 var Blocks = {};
 Blocks.position = {};
@@ -156,13 +156,13 @@ function createPiece() {
 
 	// randomize block position
 	Blocks.position = {
-		x: Math.floor(Math.random()*divisions), y: divisions-3, z: Math.floor(Math.random()*divisions)
+		x: Math.floor(Math.random()*(divisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(divisions-2)+1)
 	};
 
 	// only occurs if the player loses
 	if (collisionCheck(true) === Board.collision.floor) {
 		gameOver = true;
-		alert("Game Over!");
+		alert("Game Over! Score: " + score);
 	} 
 
 	// update current block mesh position and add to scene
@@ -252,6 +252,7 @@ function lockPiece() {
 	freezePiece();
 	removeObjectFromScene(Blocks.mesh);
 	createPiece();
+	score += 1;
 }
 
 // checks whether a block collids with the wall, floor, or another block
@@ -381,9 +382,11 @@ function setupButtons() {
 				document.getElementById("moveDown").style.visibility = "visible";
 				document.getElementById("softDrop").style.visibility = "visible";
 				document.getElementById("hardDrop").style.visibility = "visible";
+				document.getElementById("scoreText").style.visibility = "visible";
 			});
 		}
 		started = true;
+		times.lastFrameTime = Date.now();
 		createPiece();
 		animate();
 	}
@@ -509,6 +512,8 @@ function animate() {
 		times.currFrameTime -= times.stepTime;
 		movePiece(0, blockSpeed, 0);
 	}
+
+	document.getElementById("score").innerText = score;
 
 	if (!gameOver) {
 		requestAnimationFrame(animate);
