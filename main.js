@@ -6,8 +6,14 @@ var Blocks = {};
 var renderer, scene, camera, controls, cube;
 var blockSpeed = -0.125;
 var started = false;
-Blocks.position = {};
-var staticBlocks = Array(10).fill().map(() => Array(10).fill(0));
+
+//Blocks.position = {};
+var staticBlocks = [];
+//var staticBlocks = Array(10).fill().map(() => Array(10).fill(0));
+let Board = {};
+Board.fields = [];
+var blockSize = 20;
+var divisions = 10;
 
 //var inGame = true;
 var zColors = [
@@ -51,6 +57,18 @@ Blocks.blockShapes = [
 
 ];
 
+function initBoard(x,y,z) {
+    for(var i = 0; i < x; i++) {
+        Board.fields[i] = [];
+        for(var j = 0; j < y; j++) {
+            Board.fields[i][j] = [];
+            for(var k = 0; k < z; k++) {
+                Board.fields[i][j][k] = 0;
+            }
+        }
+    }
+};
+
 function blockGenerate() {
     var geometries = [];
 
@@ -62,11 +80,9 @@ function blockGenerate() {
         Blocks.shape[i] = cloneVector(Blocks.blockShapes[type][i]);
     }
 
-    for ( let i = 0; i < Blocks.shape.length; i++ ) {
-        var tmpGeometry = new THREE.BoxGeometry(20, 20, 20);
-
-        tmpGeometry.translate(20 * Blocks.shape[i].x, 20 * Blocks.shape[i].y, 0);
-
+    for (var i = 0; i < Blocks.shape.length; i++) {
+        var tmpGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+        tmpGeometry.translate(blockSize * Blocks.shape[i].x, blockSize * Blocks.shape[i].y, 0);
         geometries.push(tmpGeometry);
     }
 
@@ -84,27 +100,24 @@ function blockGenerate() {
     ]);
 
     //Blocks.blockPosition = { x: Math.floor(0 / 2) - 1, y: Math.floor(0 / 2) - 1, z: 0 };
-	Blocks.position = { x: Math.floor(Math.random()*10), y: 10, z: Math.floor(Math.random()*10) };
+	  Blocks.blockPosition = { x: Math.floor(Math.random()*divisions), y: divisions, z: Math.floor(Math.random()*divisions) };
 
-    Blocks.mesh.position.x = (Blocks.position.x - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.position.y = (Blocks.position.y - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.position.z = (Blocks.position.z - 0 / 2) * 20 + 20 / 2;
-    Blocks.mesh.overdraw = false;
+    Blocks.mesh.position.x = (Blocks.blockPosition.x - 0 / 2) * blockSize + blockSize / 2;
+    Blocks.mesh.position.y = (Blocks.blockPosition.y - 0 / 2) * blockSize + blockSize / 2;
+    Blocks.mesh.position.z = (Blocks.blockPosition.z - 0 / 2) * blockSize + blockSize / 2;
+    Blocks.mesh.overdraw = true;
 
     scene.add(Blocks.mesh);
 }
 
 function createMultiMaterialObject( geometry, materials ) {
-
 	const group = new THREE.Group();
-
 	for ( let i = 0; i < materials.length; i++ ) {
-		group.add( new THREE.Mesh( geometry, materials[ i ] ) );
+		group.add( new THREE.Mesh( geometry, materials[i] ) );
 	}
 
 	return group;
-
-}
+};
 
 function cloneVector(v) {
 	return {x: v.x, y: v.y, z: v.z};
@@ -114,21 +127,21 @@ function roundVector(v) {
 	v.x = Math.round(v.x);
 	v.y = Math.round(v.y);
 	v.z = Math.round(v.z);
-}
+};
 
 function addStaticBlock(x,y,z) {
 	console.log(x, y, z);
 	if(staticBlocks[x] === undefined) staticBlocks[x] = [];
 	if(staticBlocks[x][y] === undefined) staticBlocks[x][y] = [];
 
-	var mesh = createMultiMaterialObject(new THREE.BoxGeometry( 20, 20, 20), [
+	var mesh = createMultiMaterialObject(new THREE.BoxGeometry( blockSize, blockSize, blockSize), [
 		new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true, transparent: true}),
 		new THREE.MeshBasicMaterial({color: zColors[1]})
 	  ] );
 
-	mesh.position.x = (x - 0/2)*20 + 20/2;
-	mesh.position.y = (y - 0/2)*20 + 20/2;
-	mesh.position.z = (z - 0/2)*20 + 20/2;
+	mesh.position.x = (x - 0/2)*blockSize + blockSize/2;
+	mesh.position.y = (y - 0/2)*blockSize + blockSize/2;
+	mesh.position.z = (z - 0/2)*blockSize + blockSize/2;
 	//mesh.position.x = 10;
 	//mesh.position.y = 190;
 	//mesh.position.z = 10;
@@ -137,23 +150,23 @@ function addStaticBlock(x,y,z) {
 	scene.add(mesh);
 
 	staticBlocks[x][y][z] = mesh;
+	//Board.fields[x][y][z] = 2;
 };
 
 // Create 3d Grid
 function createGrid() {
-	var gridXZ = new THREE.GridHelper(200, 10);
+	var gridXZ = new THREE.GridHelper(200, divisions);
 	gridXZ.position.set( 100,0,100 );
 	scene.add(gridXZ);
 
-	var gridXY = new THREE.GridHelper(200, 10);
+	var gridXY = new THREE.GridHelper(200, divisions);
 	gridXY.position.set( 100,100,0 );
 	gridXY.rotation.x = Math.PI/2;
 	scene.add(gridXY);
 
-	var gridYZ = new THREE.GridHelper(200, 10);
+	var gridYZ = new THREE.GridHelper(200, divisions);
 	gridYZ.position.set( 0,100,100 );
 	gridYZ.rotation.z = Math.PI/2;
-
 	scene.add(gridYZ);
 }
 
@@ -172,10 +185,15 @@ function init() {
 	controls = new OrbitControls( camera, renderer.domElement );
 
 	createGrid();
+	
+	initBoard(200, 200, 200);
+
+	//blockGenerate();
 
 	camera.position.set( 350, 225, 350 );
+	//camera.position.set( 400, 150, 400 );
   
-  document.getElementById("start").onclick = function() {
+	document.getElementById("start").onclick = function() {
 		if (!started) {
 			const listener = new THREE.AudioListener();
 			camera.add( listener );
@@ -205,72 +223,163 @@ function init() {
 	blockGenerate();
   }
 
-  document.getElementById("rotateX").onclick = function() {
-	rotate(90, 0, 0);
-  }
-
-  document.getElementById("rotateY").onclick = function() {
-	rotate(0, 90, 0);
-  }
-
   document.getElementById("rotateZ").onclick = function() {
 	rotate(0, 0, 90);
   }
 
   document.getElementById("moveLeft").onclick = function() {
-	move(-20, 0, 0);
+	move(-1*blockSize, 0, 0);
   }
 
   document.getElementById("moveRight").onclick = function() {
-	move(20, 0, 0);
+	move(blockSize, 0, 0);
   }
 
   document.getElementById("moveUp").onclick = function() {
-	move(0, 0, 20);
+	move(0, 0, blockSize);
   }
 
   document.getElementById("moveDown").onclick = function() {
-	move(0, 0, -20);
+	move(0, 0, -1*blockSize);
   }
 
   document.getElementById("softDrop").onclick = function() {
-	move(0, -20, 0);
+	move(0, -1*blockSize, 0);
   }
 
   document.getElementById("hardDrop").onclick = function() {
 	move(0, -1000, 0);
   }
+
+window.addEventListener('keydown', function (event) {
+	//console.log( event.key );
+	
+    switch (event.key) {
+		case "ArrowUp":
+            move(0, 0, -1*blockSize);
+            break;
+
+        case "ArrowDown":
+            move(0, 0, blockSize);
+            break;
+
+        case "ArrowLeft":
+            move(-1*blockSize, 0, 0);
+            break;
+
+        case "ArrowRight":
+            move(blockSize, 0, 0);
+            break;
+
+        case " ": 
+            move(0, -1*divisions, 0 );
+            break;
+
+        case "w":
+            rotate(90, 0, 0);
+            break;
+
+        case "s":
+            rotate(-90, 0, 0);
+            break;
+
+        case "a":
+            rotate(0, 0, 90);
+            break;
+
+        case "d":
+            rotate(0, 0, -90);
+            break;
+
+        case "q":
+            rotate(0, 90, 0);
+            break;
+
+        case "e":
+            rotate(0, -90, 0);
+            break;
+    }
+}, false);
+
+function isBaseFilled() {
+	for(var i = 0; i < divisions; i++) {
+		for(var k = 0; k < divisions; k++) {
+			//console.log(Board.fields[i][0][k]);
+			//console.log(i, k);
+			if (Board.fields[i][0][k] == 0) {
+				//console.log(Board.fields[i][0][k]);
+				return false
+			}
+		}
+	}
+
+	return true;
 }
 
-function move (x, y, z) {
-	Blocks.mesh.position.x += x;
-	Blocks.position.x += x;
-  
-	Blocks.mesh.position.y += y;
-	Blocks.position.y += y;
-   
-	Blocks.mesh.position.z += z;
-	Blocks.position.z += z;
-  
-	if(Blocks.mesh.position.y <= 10) {
-		Blocks.mesh.position.y = 10;
+function move (x,y,z) {
+	var xCheck = Blocks.mesh.position.x + x;
+	var yCheck = Blocks.mesh.position.y + y;
+	var zCheck = Blocks.mesh.position.z + z;
+
+	if(yCheck > (blockSize / 2)) {
+		Blocks.mesh.position.y += y;
+		//Blocks.position.y += y;
+	} 
+	else {
 		hitBottom();
 	}
-};
+
+	if (xCheck > 0 && xCheck < 200) {		
+		Blocks.mesh.position.x += x;
+		//Blocks.position.x += x;
+	}
+
+	if (zCheck < 200 && zCheck > 0) {
+		Blocks.mesh.position.z += z;
+		//Blocks.position.z += z;
+	}
+  
+	//if(Blocks.mesh.position.y <= 10) hitBottom();
+
+	//if(staticBlocks[Blocks.mesh.position.x][Blocks.mesh.position.y][Blocks.mesh.position.z] !== undefined) {
+		//hitBottom();
+	//}
+
+	//checkCollision();
+  };
+
+  function rotate(x,y,z) {
+	Blocks.mesh.rotation.x += x * Math.PI / 180;
+	Blocks.mesh.rotation.y += y * Math.PI / 180;
+	Blocks.mesh.rotation.z += z * Math.PI / 180;
+
+	// need to cancel the rotate if the rotate collides with a block or a wall, but we don't have the code for collision checking
+	// rotate(-x, -y, -z);
+  };
 
 function hitBottom() {
 	freeze();
+	//console.log(Blocks.mesh.position.x,Blocks.mesh.position.y, Blocks.mesh.position.z );
+	//var answer = isBaseFilled();
+	//console.log(answer);
 	//scene.removeObject(Blocks.mesh);
 	blockGenerate();
-	blockSpeed *= 1.1;
-};
+	blockSpeed *= 1.01;
+  
+  };
 
 function freeze() {
 	for ( let i = 0 ; i < Blocks.shape.length; i++ ) {
 		addStaticBlock(Blocks.position.x + Blocks.shape[i].x, Blocks.position.y + Blocks.shape[i].y, Blocks.position.z + Blocks.shape[i].z);
 	}
-  
-};
+
+	//var shape = Blocks.shape;
+	//for(var i = 0 ; i < shape.length; i++) {
+		//addStaticBlock(Blocks.mesh.position.x, Blocks.mesh.position.y, Blocks.mesh.position.z);
+		//console.log(Blocks.mesh.position.x,Blocks.mesh.position.y,Blocks.mesh.position.z );
+		//Board.fields[Blocks.position.x + shape[i].x][Blocks.position.y + shape[i].y][Blocks.position.z + shape[i].z] = Board.status.freeze;
+	//}
+  };
 
 function rotate(x, y, z) {
 	Blocks.mesh.rotation.x += (x * Math.PI) / 180;
@@ -289,7 +398,7 @@ function animate() {
 	//controls.update() must be called after any manual changes to the camera's transform
 	controls.update();
 
-	move(0, blockSpeed, 0);
+	move(0,blockSpeed,0);
 
 	renderer.render( scene, camera );
 }
@@ -301,3 +410,13 @@ function main() {
 
 main()
 //var i = 0, j = 0, k = 0, interval = setInterval(function() {if(i==10) {i=0;j++;} if(j==10) {j=0;k++;} if(k==10) {clearInterval(interval); return;} addStaticBlock(i,j,k); i++;},30);
+// for(var i = 0; i < divisions; i++) {
+// 	for (var j = 0; j < divisions; j++) {
+// 		addStaticBlock(i,0,j);
+// 		//console.log(staticBlocks[i][0][j]);
+// 	}
+// }
+//console.log(Board.fields[0][0][1]);
+
+// var x = isBaseFilled();
+// console.log(x);
