@@ -60,8 +60,7 @@ Board.collision = {none: 0, wall: 1, floor: 2};
 Board.field = {empty: 0, active: 1, solidified: 2};
 Board.fields = [];
 
-// initializes the fields var to 0's
-// represents the 10x10x10 board and what each "cell" is
+// initializes the fields var to 0's, represents the 10x10x10 board and what each "cell" is
 function initBoard(x, y, z) {
     for(let i = 0; i < x; i++) {
         Board.fields[i] = [];
@@ -75,7 +74,7 @@ function initBoard(x, y, z) {
 }
 
 // deletes active block
-function removeObjectScene(mesh) {
+function removeObjectFromScene(mesh) {
 	scene.remove(mesh);
 	mesh = undefined;
 }
@@ -123,7 +122,7 @@ function createStaticBlocks(x, y, z) {
 }
 
 // creates an active merged block at a randomized location
-function create() {
+function createPiece() {
 	let geometries = [];
 
 	// randomize color and type of block
@@ -163,6 +162,7 @@ function create() {
 	// only occurs if the player loses
 	if (collisionCheck(true) === Board.collision.floor) {
 		gameOver = true;
+		alert("Game Over!");
 	} 
 
 	// update current block mesh position and add to scene
@@ -175,7 +175,7 @@ function create() {
 }
 
 // rotates the block by the provided degrees
-function rotate(x, y, z) {
+function rotatePiece(x, y, z) {
 	// convert to radians
 	Blocks.mesh.rotation.x += (x * Math.PI) / 180;
 	Blocks.mesh.rotation.y += (y * Math.PI) / 180;
@@ -188,7 +188,7 @@ function rotate(x, y, z) {
 	// apply rotation matrix to coordinates
 	for (let i = 0; i < Blocks.shape.length; i++) {
 		let vector = Blocks.shapes[Blocks.type][i];
-		
+
 		// workaround to do matrix multiplication since applyMatrix4 wasn't working (manual mult)
 		Blocks.shape[i].x = vector.x * rotMatrix.elements[0] + vector.y * rotMatrix.elements[4] 
 			+ vector.z * rotMatrix.elements[8] + rotMatrix.elements[12];
@@ -200,12 +200,12 @@ function rotate(x, y, z) {
 	}
 	// prevent bad rotates
 	if (collisionCheck(false) === Board.collision.floor || collisionCheck(false) === Board.collision.wall) {
-		rotate(-x, -y, -z);
+		rotatePiece(-x, -y, -z);
 	} 
 }
 
 // moves the block by the provided units
-function move(x, y, z) {
+function movePiece(x, y, z) {
 	// adjust block by x, y, and z units
 	Blocks.mesh.position.x += x * blockSize;
 	Blocks.position.x += x;
@@ -225,15 +225,15 @@ function move(x, y, z) {
 	// see if the move will collide with the wall or floor and take appropriate action
 	let collisionCheckFlag = collisionCheck(y != 0);
 	if (collisionCheckFlag === Board.collision.wall) {
-		move(-x, 0, -z);
+		movePiece(-x, 0, -z);
 	} else if (collisionCheckFlag === Board.collision.floor) {
-		grounded();
-		checkComplete();
+		lockPiece();
+		rowClearCheck();
 	}
 }
 
 // turn each active invidual block into a static block
-function solidify() {
+function freezePiece() {
 	let shape = Blocks.shape;
 
 	for (let i = 0; i < shape.length; i++) {
@@ -248,10 +248,10 @@ function solidify() {
 }
 
 // series of actions taken when an active block should turn solid
-function grounded() {
-	solidify();
-	removeObjectScene(Blocks.mesh);
-	create();
+function lockPiece() {
+	freezePiece();
+	removeObjectFromScene(Blocks.mesh);
+	createPiece();
 }
 
 // checks whether a block collids with the wall, floor, or another block
@@ -287,9 +287,9 @@ function collisionCheck(groundedFlag) {
 
 // PROTOTYPE, UNSURE IF WORKING 
 // checks if a level has been cleared and deletes the entire level 
-function checkComplete() {
+function rowClearCheck() {
 	let fields = Board.fields;
-	let rebuild = false;
+	let clearFlag = false;
 	let sum;
 
 	// number of a whole row of cells
@@ -315,13 +315,13 @@ function checkComplete() {
 						Board.field.empty;
 				}
 			}
-			rebuild = true;
+			clearFlag = true;
 			z--;
 		}
 	}
 
 	// push the rows that weren't cleared and are floating down one
-	if (rebuild) {
+	if (clearFlag) {
 		for (let z = 0; z < fields[0][0].length - 1; z++) {
 			for (let y = 0; y < fields[0].length; y++) {
 				for (let x = 0; x < fields.length; x++) {
@@ -329,7 +329,7 @@ function checkComplete() {
 						createStaticBlocks(x, y, z);
 					}
 					if (fields[x][y][z] == Board.field.empty && staticBlocks[x][y][z]) {
-						removeObjectScene(staticBlocks[x][y][z]);
+						removeObjectFromScene(staticBlocks[x][y][z]);
 						staticBlocks[x][y][z] = undefined;
 					}
 				}
@@ -384,44 +384,44 @@ function setupButtons() {
 			});
 		}
 		started = true;
-		create();
+		createPiece();
 		animate();
 	}
 
 	document.getElementById("rotateX").onclick = function() {
-		rotate(90, 0, 0);
+		rotatePiece(90, 0, 0);
 	}
 
 	document.getElementById("rotateY").onclick = function() {
-		rotate(0, 90, 0);
+		rotatePiece(0, 90, 0);
 	}
 
 	document.getElementById("rotateZ").onclick = function() {
-		rotate(0, 0, 90);
+		rotatePiece(0, 0, 90);
 	}
 
 	document.getElementById("moveLeft").onclick = function() {
-		move(blockSpeed, 0, 0);
+		movePiece(blockSpeed, 0, 0);
 	}
 
 	document.getElementById("moveRight").onclick = function() {
-		move(-(blockSpeed), 0, 0);
+		movePiece(-(blockSpeed), 0, 0);
 	}
 
 	document.getElementById("moveUp").onclick = function() {
-		move(0, 0, blockSpeed);
+		movePiece(0, 0, blockSpeed);
 	}
 
 	document.getElementById("moveDown").onclick = function() {
-		move(0, 0, -(blockSpeed));
+		movePiece(0, 0, -(blockSpeed));
 	}
 
 	document.getElementById("softDrop").onclick = function() {
-		move(0, blockSpeed, 0);
+		movePiece(0, blockSpeed, 0);
 	}
 
 	document.getElementById("hardDrop").onclick = function() {
-		move(0, -1000, 0);
+		movePiece(0, -1000, 0);
 	}
 }
 
@@ -507,7 +507,7 @@ function animate() {
 
 	while (times.currFrameTime > times.stepTime) {
 		times.currFrameTime -= times.stepTime;
-		move(0, blockSpeed, 0);
+		movePiece(0, blockSpeed, 0);
 	}
 
 	if (!gameOver) {
