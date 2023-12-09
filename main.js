@@ -231,7 +231,10 @@ function movePiece(x, y, z) {
 	} else if (collisionCheckFlag === Board.collision.floor) {
 		lockPiece();
 		rowClearCheck();
+		return false;
 	}
+
+	return true;
 }
 
 // turn each active invidual block into a static block
@@ -475,7 +478,7 @@ function setupButtons() {
 	}
 
 	document.getElementById("hardDrop").onclick = function() {
-		movePiece(0, -1000, 0);
+		while(movePiece(0, blockSpeed, 0));
 	}
 
 	document.getElementById("store").onclick = function() {
