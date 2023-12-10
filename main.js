@@ -159,7 +159,7 @@ function createPiece() {
 
 	// randomize block position
 	Blocks.position = {
-		x: Math.floor(Math.random()*(divisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(divisions-2)+1)
+		x: Math.floor(Math.random()*(gridDivisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(gridDivisions-2)+1)
 	};
 
 	// only occurs if the player loses
@@ -514,7 +514,7 @@ function init() {
 
 	createGrid();
 	
-	initBoard(divisions, divisions, divisions);
+	initBoard(gridDivisions, divisions, gridDivisions);
 
 	//camera.position.set( 350, 225, 350 );
 	camera.position.set(400, 720, 400);
@@ -591,7 +591,7 @@ function animate() {
 		controls.update();
 	}
 	renderer.render(scene, camera);
-	console.log(camera.position)
+	//console.log(camera.position)
 }
 
 function main() {
@@ -599,3 +599,9 @@ function main() {
 }
 
 main()
+// for(var i = 0; i < gridDivisions; i++) {
+// 	for (var j = 0; j < gridDivisions; j++) {
+// 		createStaticBlocks(i,0,j);
+// 		//console.log(staticBlocks[i][0][j]);
+// 	}
+// }
