@@ -280,7 +280,7 @@ function collisionCheck(groundedFlag) {
 		if (newX < 0 ||
 			newZ < 0 ||
 			newX > fields.length - 1 ||
-			newZ > fields[0].length - 1) {
+			newZ > fields[0][0].length - 1) {
 			return Board.collision.wall;
 		}
 		
@@ -443,8 +443,8 @@ function setupButtons() {
 				document.getElementById("rotateZ").style.visibility = "visible";
 				document.getElementById("moveLeft").style.visibility = "visible";
 				document.getElementById("moveRight").style.visibility = "visible";
-				document.getElementById("moveUp").style.visibility = "visible";
-				document.getElementById("moveDown").style.visibility = "visible";
+				document.getElementById("moveForward").style.visibility = "visible";
+				document.getElementById("moveBackward").style.visibility = "visible";
 				document.getElementById("softDrop").style.visibility = "visible";
 				document.getElementById("hardDrop").style.visibility = "visible";
 				document.getElementById("store").style.visibility = "visible";
@@ -477,11 +477,11 @@ function setupButtons() {
 		movePiece(-(blockSpeed), 0, 0);
 	}
 
-	document.getElementById("moveUp").onclick = function() {
+	document.getElementById("moveForward").onclick = function() {
 		movePiece(0, 0, blockSpeed);
 	}
 
-	document.getElementById("moveDown").onclick = function() {
+	document.getElementById("moveBackward").onclick = function() {
 		movePiece(0, 0, -(blockSpeed));
 	}
 
