@@ -26,43 +26,36 @@ times.currFrameTime = 0;
 
 var Blocks = {};
 Blocks.position = {};
-// Blocks.shapes = [
-// 	[
-// 		{ x: 0, y: 0, z: 0 },
-// 		{ x: 1, y: 0, z: 0 },
-// 		{ x: 1, y: 1, z: 0 },
-// 		{ x: 1, y: 2, z: 0 },
-// 	],
-// 	[
-// 		{ x: 0, y: 0, z: 0 },
-// 		{ x: 0, y: 1, z: 0 },
-// 		{ x: 0, y: 2, z: 0 },
-// 	],
-// 	[
-// 		{ x: 0, y: 0, z: 0 },
-// 		{ x: 0, y: 1, z: 0 },
-// 		{ x: 1, y: 0, z: 0 },
-// 		{ x: 1, y: 1, z: 0 },
-// 	],
-// 	[
-// 		{ x: 0, y: 0, z: 0 },
-// 		{ x: 0, y: 1, z: 0 },
-// 		{ x: 0, y: 2, z: 0 },
-// 		{ x: 1, y: 1, z: 0 },
-// 	],
-// 	[
-// 		{ x: 0, y: 0, z: 0 },
-// 		{ x: 0, y: 1, z: 0 },
-// 		{ x: 1, y: 1, z: 0 },
-// 		{ x: 1, y: 2, z: 0 },
-// 	],
-// ];
 Blocks.shapes = [
+	[
+		{ x: 0, y: 0, z: 0 },
+		{ x: 1, y: 0, z: 0 },
+		{ x: 1, y: 1, z: 0 },
+		{ x: 1, y: 2, z: 0 },
+	],
 	[
 		{ x: 0, y: 0, z: 0 },
 		{ x: 0, y: 1, z: 0 },
 		{ x: 0, y: 2, z: 0 },
-	]
+	],
+	[
+		{ x: 0, y: 0, z: 0 },
+		{ x: 0, y: 1, z: 0 },
+		{ x: 1, y: 0, z: 0 },
+		{ x: 1, y: 1, z: 0 },
+	],
+	[
+		{ x: 0, y: 0, z: 0 },
+		{ x: 0, y: 1, z: 0 },
+		{ x: 0, y: 2, z: 0 },
+		{ x: 1, y: 1, z: 0 },
+	],
+	[
+		{ x: 0, y: 0, z: 0 },
+		{ x: 0, y: 1, z: 0 },
+		{ x: 1, y: 1, z: 0 },
+		{ x: 1, y: 2, z: 0 },
+	],
 ];
 
 var Board = {};
@@ -309,21 +302,16 @@ function rowClearCheck() {
 	let sum;
 
 	// number of a whole row of cells
-	// console.log(fields[0][0].length);
-	// console.log(fields.length);
-	let expected = fields[0][0].length * fields.length;
-	//console.log(expected);
+	let expected = fields[0].length * fields.length;
 
 	// find the number of solid cells in each row
 	for (let z = 0; z < fields[0][0].length; z++) {
 		sum = 0;
-		//for (let y = 0; y < fields[0].length; y++) {
+		for (let y = 0; y < fields[0].length; y++) {
 			for (let x = 0; x < fields.length; x++) {
-				if (fields[x][0][z] === Board.field.solidified) sum++;
+				if (fields[x][y][z] === Board.field.solidified) sum++;
 			}
-		//}
-
-		//console.log(sum);
+		}
 
 		// if criteria has been met for row clear, row clear
 		if (sum == expected) {
@@ -358,63 +346,6 @@ function rowClearCheck() {
 		}
 	}
 }
-
-function rowClearCheck2() {
-	let fields = Board.fields;
-	let clearFlag = false;
-	let sum;
-
-	// number of a whole row of cells
-	// console.log(fields[0][0].length);
-	// console.log(fields.length);
-	let expected = fields[0][0].length * fields.length;
-	//console.log(expected);
-
-	// find the number of solid cells in each row
-	sum = 0;
-	for (let z = 0; z < fields[0][0].length; z++) {
-		//for (let y = 0; y < fields[0].length; y++) {
-			for (let x = 0; x < fields.length; x++) {
-				if (fields[x][0][z] === Board.field.solidified) sum++;
-			}
-		//}
-
-		console.log(sum);
-
-		// if criteria has been met for row clear, row clear
-		if (sum == expected) {
-			for (let y2 = 0; y2 < fields[0].length; y2++) {
-				for (let x2 = 0; x2 < fields.length; x2++) {
-					for (let z2 = z; z2 < fields[0][0].length - 1; z2++) {
-						Board.fields[x2][y2][z2] = fields[x2][y2][z2 + 1];
-					}
-					Board.fields[x2][y2][fields[0][0].length - 1] = 
-						Board.field.empty;
-				}
-			}
-			clearFlag = true;
-			z--;
-		}
-	}
-
-	// push the rows that weren't cleared and are floating down one
-	if (clearFlag) {
-		for (let z = 0; z < fields[0][0].length - 1; z++) {
-			for (let y = 0; y < fields[0].length; y++) {
-				for (let x = 0; x < fields.length; x++) {
-					if (fields[x][y][z] === Board.field.solidified && !staticBlocks[x][y][z]) {
-						createStaticBlocks(x, y, z);
-					}
-					if (fields[x][y][z] == Board.field.empty && staticBlocks[x][y][z]) {
-						removeObjectFromScene(staticBlocks[x][y][z]);
-						staticBlocks[x][y][z] = undefined;
-					}
-				}
-			}
-		}
-	}
-}
-
 
 function store() {
 
@@ -504,7 +435,7 @@ function setupButtons() {
 				sound.setBuffer( buffer );
 				sound.setLoop( true );
 				sound.setVolume( 0.5 );
-				//sound.play();
+				sound.play();
 
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
@@ -668,17 +599,9 @@ function main() {
 }
 
 main()
-for(var i = 0; i < gridDivisions; i++) {
-	for (var j = 0; j < gridDivisions; j++) {
-		createStaticBlocks(i,0,j);
-		Board.fields[i][0][j] = Board.field.solidified;
-		// if (staticBlocks[i][0][j]) {
-		// 	console.log('yo');
-		// }
-	}
-}
-rowClearCheck2();
-// if (Board.fields[0][0][0] == Board.field.solidified) {
-// 	console.log('here');
-// 	console.log(Board.fields[0][0][0])
+// for(var i = 0; i < gridDivisions; i++) {
+// 	for (var j = 0; j < gridDivisions; j++) {
+// 		createStaticBlocks(i,0,j);
+// 		//console.log(staticBlocks[i][0][j]);
+// 	}
 // }
