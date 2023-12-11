@@ -5,9 +5,10 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 var renderer, scene, camera, controls;
 var started = false, gameOver = false;
 var staticBlocks = [];
-var blockSize = 20;
+var blockSize = 40;
 var blockSpeed = -1;
 var divisions = 10;
+var gridDivisions = 5;
 var score = 0;
 var storeBlock = {stored: false, position: {}, shape: []};
 var usedStore = false;
@@ -158,7 +159,7 @@ function createPiece() {
 
 	// randomize block position
 	Blocks.position = {
-		x: Math.floor(Math.random()*(divisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(divisions-2)+1)
+		x: Math.floor(Math.random()*(gridDivisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(gridDivisions-2)+1)
 	};
 
 	// only occurs if the player loses
@@ -279,7 +280,7 @@ function collisionCheck(groundedFlag) {
 		if (newX < 0 ||
 			newZ < 0 ||
 			newX > fields.length - 1 ||
-			newZ > fields[0].length - 1) {
+			newZ > fields[0][0].length - 1) {
 			return Board.collision.wall;
 		}
 		
@@ -394,19 +395,30 @@ function store() {
 
 // create 3d grid for background
 function createGrid() {
-	var gridXZ = new THREE.GridHelper(200, divisions);
+	var gridXZ = new THREE.GridHelper(200, gridDivisions);
 	gridXZ.position.set( 100,0,100 );
 	scene.add(gridXZ);
 
-	var gridXY = new THREE.GridHelper(200, divisions);
+	var gridXY = new THREE.GridHelper(200, gridDivisions);
 	gridXY.position.set( 100,100,0 );
 	gridXY.rotation.x = Math.PI/2;
 	scene.add(gridXY);
 
-	var gridYZ = new THREE.GridHelper(200, divisions);
+	var gridXY2 = new THREE.GridHelper(200, gridDivisions);
+	gridXY2.position.set( 100,300,0 );
+	gridXY2.rotation.x = Math.PI/2;
+	scene.add(gridXY2);
+
+	var gridYZ = new THREE.GridHelper(200, gridDivisions);
 	gridYZ.position.set( 0,100,100 );
 	gridYZ.rotation.z = Math.PI/2;
 	scene.add(gridYZ);
+
+	var gridYZ2 = new THREE.GridHelper(200, gridDivisions);
+	gridYZ2.position.set( 0,300,100 );
+	gridYZ2.rotation.z = Math.PI/2;
+	scene.add(gridYZ2);
+
 }
 
 // all the functions related to user input, all pretty self-explanatory
@@ -431,8 +443,8 @@ function setupButtons() {
 				document.getElementById("rotateZ").style.visibility = "visible";
 				document.getElementById("moveLeft").style.visibility = "visible";
 				document.getElementById("moveRight").style.visibility = "visible";
-				document.getElementById("moveUp").style.visibility = "visible";
-				document.getElementById("moveDown").style.visibility = "visible";
+				document.getElementById("moveForward").style.visibility = "visible";
+				document.getElementById("moveBackward").style.visibility = "visible";
 				document.getElementById("softDrop").style.visibility = "visible";
 				document.getElementById("hardDrop").style.visibility = "visible";
 				document.getElementById("store").style.visibility = "visible";
@@ -465,11 +477,11 @@ function setupButtons() {
 		movePiece(-(blockSpeed), 0, 0);
 	}
 
-	document.getElementById("moveUp").onclick = function() {
+	document.getElementById("moveForward").onclick = function() {
 		movePiece(0, 0, blockSpeed);
 	}
 
-	document.getElementById("moveDown").onclick = function() {
+	document.getElementById("moveBackward").onclick = function() {
 		movePiece(0, 0, -(blockSpeed));
 	}
 
@@ -502,9 +514,10 @@ function init() {
 
 	createGrid();
 	
-	initBoard(divisions, divisions, divisions);
+	initBoard(gridDivisions, divisions, gridDivisions);
 
-	camera.position.set( 350, 225, 350 );
+	//camera.position.set( 350, 225, 350 );
+	camera.position.set(400, 720, 400);
 
 	setupButtons();
 }
@@ -578,6 +591,7 @@ function animate() {
 		controls.update();
 	}
 	renderer.render(scene, camera);
+	//console.log(camera.position)
 }
 
 function main() {
@@ -585,3 +599,9 @@ function main() {
 }
 
 main()
+// for(var i = 0; i < gridDivisions; i++) {
+// 	for (var j = 0; j < gridDivisions; j++) {
+// 		createStaticBlocks(i,0,j);
+// 		//console.log(staticBlocks[i][0][j]);
+// 	}
+// }
