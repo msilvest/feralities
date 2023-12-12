@@ -555,19 +555,19 @@ function init() {
 
 window.addEventListener('keydown', function (event) {	
     switch (event.key) {
-		case "ArrowUp":
+		case "ArrowDown":
             movePiece(0, 0, -(blockSpeed));
             break;
 
-        case "ArrowDown":
+        case "ArrowUp":
             movePiece(0, 0, blockSpeed);
             break;
 
-        case "ArrowLeft":
+        case "ArrowRight":
             movePiece(-(blockSpeed), 0, 0);
             break;
 
-        case "ArrowRight":
+        case "ArrowLeft":
             movePiece(blockSpeed, 0, 0);
             break;
 
