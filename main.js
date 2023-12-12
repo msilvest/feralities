@@ -553,55 +553,53 @@ function init() {
 	setupButtons();
 }
 
-// commented out because causes game to break with rotations through walls, etc.
-// haven't tested it with my revised code so maybe it works now idk
-// window.addEventListener('keydown', function (event) {	
-//     switch (event.key) {
-// 		case "ArrowUp":
-//             move(0, 0, -1*blockSize);
-//             break;
+window.addEventListener('keydown', function (event) {	
+    switch (event.key) {
+		case "ArrowUp":
+            movePiece(0, 0, -(blockSpeed));
+            break;
 
-//         case "ArrowDown":
-//             move(0, 0, blockSize);
-//             break;
+        case "ArrowDown":
+            movePiece(0, 0, blockSpeed);
+            break;
 
-//         case "ArrowLeft":
-//             move(-1*blockSize, 0, 0);
-//             break;
+        case "ArrowLeft":
+            movePiece(-(blockSpeed), 0, 0);
+            break;
 
-//         case "ArrowRight":
-//             move(blockSize, 0, 0);
-//             break;
+        case "ArrowRight":
+            movePiece(blockSpeed, 0, 0);
+            break;
 
-//         case " ": 
-//             move(0, -1*divisions, 0 );
-//             break;
+        case " ": 
+			while(movePiece(0, blockSpeed, 0));
+            break;
 
-//         case "w":
-//             rotate(90, 0, 0);
-//             break;
+        case "w":
+            rotatePiece(90, 0, 0);
+            break;
 
-//         case "s":
-//             rotate(-90, 0, 0);
-//             break;
+        case "s":
+            rotatePiece(-90, 0, 0);
+            break;
 
-//         case "a":
-//             rotate(0, 0, 90);
-//             break;
+        case "a":
+            rotatePiece(0, 0, 90);
+            break;
 
-//         case "d":
-//             rotate(0, 0, -90);
-//             break;
+        case "d":
+            rotatePiece(0, 0, -90);
+            break;
 
-//         case "q":
-//             rotate(0, 90, 0);
-//             break;
+        case "q":
+            rotatePiece(0, 90, 0);
+            break;
 
-//         case "e":
-//             rotate(0, -90, 0);
-//             break;
-//     }
-// }, false);
+        case "e":
+            rotatePiece(0, -90, 0);
+            break;
+    }
+}, false);
 
 // moves the block and updates animation based in real time
 function animate() {
