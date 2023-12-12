@@ -354,20 +354,21 @@ function store() {
 	}
 
 	if (storeBlock.stored) {
-		scene.remove(Blocks.mesh);
-		let temp = storeBlock.clone();
-		storeBlock = Blocks.mesh.clone();
-		//let temp = JSON.parse(JSON.stringify(storeBlock));
-		//let blockPos = JSON.parse(JSON.stringify(Blocks.mesh.position));
-		//storeBlock = JSON.parse(JSON.stringify(Blocks.mesh));
-		Blocks.mesh = temp.clone();
-		scene.add(Blocks.mesh);
-		Blocks.mesh.position.x = storeBlock.position.x;
-		Blocks.mesh.position.y = storeBlock.position.y;
-		Blocks.mesh.position.z = storeBlock.position.z;
+
+		// clear current block from scene
+		removeObjectFromScene(Blocks.mesh);
+
+		// temporary block object for swap
+		let temp = {position: {}, shape: []};
+		temp.mesh = storeBlock.mesh.clone();
+		temp.position.x = storeBlock.position.x;
+		temp.position.y = storeBlock.position.y;
+		temp.position.z = storeBlock.position.z;
+		for (let i=0; i < storeBlock.shape.length; i++) {
+			temp.shape[i] = cloneVector(storeBlock.shape[i]);
 		}
-	else {
-		scene.remove(Blocks.mesh);
+
+		// store current block into store block
 		storeBlock.mesh = Blocks.mesh.clone();
 		storeBlock.position.x = Blocks.position.x;
 		storeBlock.position.y = Blocks.position.y;
@@ -375,18 +376,48 @@ function store() {
 		for (let i=0; i < Blocks.shape.length; i++) {
 			storeBlock.shape[i] = cloneVector(Blocks.shape[i]);
 		}
-		//let blockPos = JSON.parse(JSON.stringify(Blocks.mesh.position));
-		//storeBlock = JSON.parse(JSON.stringify(Blocks.mesh));
-		createPiece();
-		for (let i=0; i < storeBlock.shape.length; i++) {
-			Blocks.shape[i] = cloneVector(storeBlock.shape[i]);
-		}
+
+		// put stored block into current block
+		Blocks.mesh = temp.mesh.clone();
 		Blocks.mesh.position.x = storeBlock.mesh.position.x;
 		Blocks.mesh.position.y = storeBlock.mesh.position.y;
 		Blocks.mesh.position.z = storeBlock.mesh.position.z;
 		Blocks.position.x = storeBlock.position.x;
 		Blocks.position.y = storeBlock.position.y;
 		Blocks.position.z = storeBlock.position.z;
+		for (let i=0; i < temp.shape.length; i++) {
+			Blocks.shape[i] = cloneVector(temp.shape[i]);
+		}
+
+		// add swapped block to scene
+		scene.add(Blocks.mesh);
+	}
+
+	else {
+
+		// remove current block from scene
+		removeObjectFromScene(Blocks.mesh);
+
+		// store current block in store block
+		storeBlock.mesh = Blocks.mesh.clone();
+		storeBlock.position.x = Blocks.position.x;
+		storeBlock.position.y = Blocks.position.y;
+		storeBlock.position.z = Blocks.position.z;
+		for (let i=0; i < Blocks.shape.length; i++) {
+			storeBlock.shape[i] = cloneVector(Blocks.shape[i]);
+		}
+
+		// generate new block
+		createPiece();
+
+		// restore original block positions
+		Blocks.mesh.position.x = storeBlock.mesh.position.x;
+		Blocks.mesh.position.y = storeBlock.mesh.position.y;
+		Blocks.mesh.position.z = storeBlock.mesh.position.z;
+		Blocks.position.x = storeBlock.position.x;
+		Blocks.position.y = storeBlock.position.y;
+		Blocks.position.z = storeBlock.position.z;
+
 		storeBlock.stored = true;
 	}
 
