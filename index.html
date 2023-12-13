@@ -3,24 +3,64 @@
 	<head>
 		<meta charset="utf-8">
 		<title>3-D Tetris</title>
+		<link rel="stylesheet" href="./styles.css">
+		<link href='https://fonts.googleapis.com/css?family=Rubik Pixels' rel='stylesheet'>
 		<style>
-			body { margin: 5; }
+			body { 
+				margin: 0;
+				display: flex;
+            	align-items: center;
+            	justify-content: center;
+           		height: 100vh;
+				background-color: #add8e6;
+				background: url('tetris-full-background.jpeg') center center/cover no-repeat fixed;
+				font-family: 'Rubik Pixels';
+				font-size: 22px;
+				overflow: hidden; /* Ensure no scrollbars */
+			}
+			h1 {
+            	position: absolute; /* Position the heading */
+           		top: 200px; /* Adjust the top position as needed */
+            	font-size: 3rem; /* Adjust the font size as needed */
+            	color: #ffffff; /* Set the font color */
+            	text-align: center;
+            	width: 100%; /* Make the heading span the width of the viewport */
+				transition: opacity 0.5s ease;
+        	}
+			.hidden {
+            	opacity: 0 !important; /* Make the heading invisible */
+        	}
 		</style>
 	</head>
 	<body>
 		<script type="module" src="./main.js"></script>
 		<canvas id="canvas"></canvas>
-		<button id="start">START</button>
-		<button id="rotateX" style="visibility: hidden;">Rotate X</button>
-		<button id="rotateY" style="visibility: hidden;">Rotate Y</button>
-		<button id="rotateZ" style="visibility: hidden;">Rotate Z</button>
-		<button id="moveLeft" style="visibility: hidden;">Move Left</button>
-		<button id="moveRight" style="visibility: hidden;">Move Right</button>
-		<button id="moveForward" style="visibility: hidden;">Move Forward</button>
-		<button id="moveBackward" style="visibility: hidden;">Move Backward</button>
-		<button id="softDrop" style="visibility: hidden;">Soft Drop</button>
-		<button id="hardDrop" style="visibility: hidden;">Hard Drop</button>
-		<button id="store" style="visibility: hidden;">Store</button>
+		<h1 id="tetrisHeading">
+			Welcome to 3-D Tetris!<br>
+			Press the button to begin:
+		</h1>
+		<button id="start" class="btn btn-start" onclick="hideHeading()">
+			<img src="tetris_logo.jpeg" alt="Tetris Logo" style="max-width: 100%; height: auto; margin-top: 30px;">
+		</button>
+		<div class="btn-container">
+			<button id="rotateX" style="visibility: hidden;">Rotate X</button>
+			<button id="rotateY" style="visibility: hidden;">Rotate Y</button>
+			<button id="rotateZ" style="visibility: hidden;">Rotate Z</button>
+			<button id="moveLeft" style="visibility: hidden;">Move Left</button>
+			<button id="moveRight" style="visibility: hidden;">Move Right</button>
+			<button id="moveForward" style="visibility: hidden;">Move Forward</button>
+			<button id="moveBackward" style="visibility: hidden;">Move Backward</button>
+			<button id="softDrop" style="visibility: hidden;">Soft Drop</button>
+			<button id="hardDrop" style="visibility: hidden;">Hard Drop</button>
+			<button id="store" style="visibility: hidden;">Store</button>
+		</div>
 		<span id="scoreText" style="visibility:hidden;">Score: <span id="score"></span></span>
+		<script>
+			document.getElementById('start').addEventListener('click', function () {
+        	var heading = document.getElementById('tetrisHeading');
+        	heading.classList.add('hidden');
+			document.body.style.backgroundColor = '#000000';
+    	});
+		</script>
 	</body>
 </html>
