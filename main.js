@@ -111,7 +111,7 @@ function createStaticBlocks(x, y, z) {
 
 	var mesh = createMultiMaterialObject(new THREE.BoxGeometry( blockSize, blockSize, blockSize), [
 		new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true, transparent: true}),
-		new THREE.MeshBasicMaterial({color: zColors[1]})]);
+		new THREE.MeshBasicMaterial({color: Blocks.color})]);
 
 	mesh.position.x = (x)*blockSize + blockSize/2;
 	mesh.position.y = (y)*blockSize + blockSize/2;
@@ -133,6 +133,7 @@ function createPiece() {
 	let type = Math.floor(Math.random() * Blocks.shapes.length);
 	Blocks.type = type;
 	Blocks.shape = [];
+	Blocks.color = zColors[color];
 
 	// updates current block with the randomly selected type
 	for (let i = 0; i < Blocks.shapes[type].length; i++) {
@@ -154,7 +155,7 @@ function createPiece() {
             wireframe: true,
             transparent: true,
         }),
-        new THREE.MeshBasicMaterial({ color: zColors[color]}),
+        new THREE.MeshBasicMaterial({ color: Blocks.color}),
     ]);
 
 	// randomize block position
@@ -327,6 +328,7 @@ function rowClearCheck() {
 					staticBlocks[x][y][z] = undefined;
 				}
 			}
+			score += 10;
 		}
 
 		// push the rows that weren't cleared and are floating down one
@@ -372,6 +374,7 @@ function store() {
 		temp.position.x = storeBlock.position.x;
 		temp.position.y = storeBlock.position.y;
 		temp.position.z = storeBlock.position.z;
+		temp.color = storeBlock.color;
 		for (let i=0; i < storeBlock.shape.length; i++) {
 			temp.shape[i] = cloneVector(storeBlock.shape[i]);
 		}
@@ -381,6 +384,7 @@ function store() {
 		storeBlock.position.x = Blocks.position.x;
 		storeBlock.position.y = Blocks.position.y;
 		storeBlock.position.z = Blocks.position.z;
+		storeBlock.color = Blocks.color;
 		for (let i=0; i < Blocks.shape.length; i++) {
 			storeBlock.shape[i] = cloneVector(Blocks.shape[i]);
 		}
@@ -393,6 +397,7 @@ function store() {
 		Blocks.position.x = storeBlock.position.x;
 		Blocks.position.y = storeBlock.position.y;
 		Blocks.position.z = storeBlock.position.z;
+		Blocks.color = temp.color;
 		for (let i=0; i < temp.shape.length; i++) {
 			Blocks.shape[i] = cloneVector(temp.shape[i]);
 		}
@@ -411,6 +416,7 @@ function store() {
 		storeBlock.position.x = Blocks.position.x;
 		storeBlock.position.y = Blocks.position.y;
 		storeBlock.position.z = Blocks.position.z;
+		storeBlock.color = Blocks.color;
 		for (let i=0; i < Blocks.shape.length; i++) {
 			storeBlock.shape[i] = cloneVector(Blocks.shape[i]);
 		}
@@ -605,6 +611,10 @@ window.addEventListener('keydown', function (event) {
         case "e":
             rotatePiece(0, -90, 0);
             break;
+
+		case "r":
+			store();
+			break;
     }
 }, false);
 
