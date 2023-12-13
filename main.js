@@ -294,59 +294,9 @@ function collisionCheck(groundedFlag) {
 	}
 }
 
-// PROTOTYPE, UNSURE IF WORKING 
-// checks if a level has been cleared and deletes the entire level 
+// checks if a row is filled and if so, removes the row and shifts all blocks
+// in the rows above the one just removed down one
 function rowClearCheck() {
-	let fields = Board.fields;
-	let clearFlag = false;
-	let sum;
-
-	// number of a whole row of cells
-	let expected = fields[0].length * fields.length;
-
-	// find the number of solid cells in each row
-	for (let z = 0; z < fields[0][0].length; z++) {
-		for (let y = 0; y < fields[0].length; y++) {
-			for (let x = 0; x < fields.length; x++) {
-				if (fields[x][y][z] === Board.field.solidified) sum++;
-			}
-		}
-
-		// if criteria has been met for row clear, row clear
-		if (sum == expected) {
-			for (let y2 = 0; y2 < fields[0].length; y2++) {
-				for (let x2 = 0; x2 < fields.length; x2++) {
-					for (let z2 = z; z2 < fields[0][0].length - 1; z2++) {
-						Board.fields[x2][y2][z2] = fields[x2][y2][z2 + 1];
-					}
-					Board.fields[x2][y2][fields[0][0].length - 1] = 
-						Board.field.empty;
-				}
-			}
-			clearFlag = true;
-			z--;
-		}
-	}
-
-	// push the rows that weren't cleared and are floating down one
-	if (clearFlag) {
-		for (let z = 0; z < fields[0][0].length - 1; z++) {
-			for (let y = 0; y < fields[0].length; y++) {
-				for (let x = 0; x < fields.length; x++) {
-					if (fields[x][y][z] === Board.field.solidified && !staticBlocks[x][y][z]) {
-						createStaticBlocks(x, y, z);
-					}
-					if (fields[x][y][z] == Board.field.empty && staticBlocks[x][y][z]) {
-						removeObjectFromScene(staticBlocks[x][y][z]);
-						staticBlocks[x][y][z] = undefined;
-					}
-				}
-			}
-		}
-	}
-}
-
-function rowClearCheck2() {
 	let fields = Board.fields;
 	let clearFlag = false;
 	let sum;
@@ -360,7 +310,6 @@ function rowClearCheck2() {
 		console.log("New Row");
 		for (let z = 0; z < fields[0][0].length; z++) {
 			for (let x = 0; x < fields.length; x++) {
-				//console.log(fields[x][y][z]);
 				if (fields[x][y][z] === Board.field.solidified) {
 					sum++;
 				}
@@ -380,13 +329,15 @@ function rowClearCheck2() {
 			}
 		}
 
-	// // push the rows that weren't cleared and are floating down one
+		// push the rows that weren't cleared and are floating down one
 		if (clearFlag) {
 			console.log("Shift Blocks");
 			for (let y2 = y+1; y2 < fields[0].length; y2++) {
 				for (let z2 = 0; z2 < fields[0][0].length; z2++) {
 					for (let x2 = 0; x2 < fields.length; x2++) {
-						if (fields[x2][y2][z2] === Board.field.solidified && !staticBlocks[x2][y2-1][z2]) {
+						if ((fields[x2][y2][z2] === Board.field.solidified) && (fields[x2][y2-1][z2] === Board.field.empty) ) {
+							console.log('here');
+							console.log(staticBlocks[x2][y2][z2]);
 							// remove current block from the scene
 							removeObjectFromScene(staticBlocks[x2][y2][z2]);
 							fields[x2][y2][z2] -= 2;
@@ -399,18 +350,6 @@ function rowClearCheck2() {
 					}
 				}
 			}
-	// 	for (let z = 0; z < fields[0][0].length - 1; z++) {
-	// 		for (let y = 0; y < fields[0].length; y++) {
-	// 			for (let x = 0; x < fields.length; x++) {
-	// 				if (fields[x][y][z] === Board.field.solidified && !staticBlocks[x][y][z]) {
-	// 					createStaticBlocks(x, y, z);
-	// 				}
-	// 				if (fields[x][y][z] == Board.field.empty && staticBlocks[x][y][z]) {
-	// 					removeObjectFromScene(staticBlocks[x][y][z]);
-	// 					staticBlocks[x][y][z] = undefined;
-	// 				}
-	// 			}
-	// 		}
 		}
 	}
 }
@@ -535,7 +474,7 @@ function setupButtons() {
 				sound.setBuffer( buffer );
 				sound.setLoop( true );
 				sound.setVolume( 0.5 );
-				//sound.play();
+				sound.play();
 
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
@@ -616,7 +555,6 @@ function init() {
 	
 	initBoard(gridDivisions, divisions, gridDivisions);
 
-	//camera.position.set( 350, 225, 350 );
 	camera.position.set(400, 720, 400);
 
 	setupButtons();
@@ -689,7 +627,6 @@ function animate() {
 		controls.update();
 	}
 	renderer.render(scene, camera);
-	//console.log(camera.position)
 }
 
 function main() {
@@ -697,22 +634,3 @@ function main() {
 }
 
 main()
-for(var i = 0; i < gridDivisions; i++) {
-	for (var j = 0; j < gridDivisions; j++) {
-		createStaticBlocks(i,0,j);
-		Board.fields[i][0][j] = Board.field.solidified;
-	}
-}
-
-createStaticBlocks(0,1,0);
-Board.fields[0][1][0] = Board.field.solidified;
-
-rowClearCheck2();
-
-// for(var i = 0; i < gridDivisions; i++) {
-// 	for (var j = 0; j < gridDivisions; j++) {
-// 		removeObjectFromScene(staticBlocks[i][0][j]);
-// 	}
-// }
-
-//createStaticBlocks(0,0,0);
