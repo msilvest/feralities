@@ -163,6 +163,9 @@ function createPiece() {
 		x: Math.floor(Math.random()*(gridDivisions-2)+1), y: divisions-3, z: Math.floor(Math.random()*(gridDivisions-2)+1)
 	};
 
+	// ensures there isn't a block already there when generated
+	Blocks.position.x, Blocks.position.y, Blocks.position.z = checkPosition(Blocks.position.x, Blocks.position.y, Blocks.position.z);
+
 	// only occurs if the player loses
 	if (collisionCheck(true) === Board.collision.floor) {
 		gameOver = true;
@@ -176,6 +179,17 @@ function createPiece() {
 	Blocks.mesh.overdraw = true;
 
 	scene.add(Blocks.mesh);
+}
+
+// ensures that a new block will not be generated where another
+// block already exists
+function checkPosition(x, y, z) {
+	while (Board.fields[x][y][z] === Board.field.solidified) {
+		x = Math.floor(Math.random()*(gridDivisions-2)+1);
+		z = Math.floor(Math.random()*(gridDivisions-2)+1);
+	}
+
+	return x,y,z;
 }
 
 // rotates the block by the provided degrees
@@ -308,7 +322,6 @@ function rowClearCheck() {
 	// find the number of solid cells in each row
 	for (let y = 0; y < fields[0].length; y++) {
 		sum = 0;
-		console.log("New Row");
 		for (let z = 0; z < fields[0][0].length; z++) {
 			for (let x = 0; x < fields.length; x++) {
 				if (fields[x][y][z] === Board.field.solidified) {
@@ -319,7 +332,6 @@ function rowClearCheck() {
 
 		// if criteria has been met for row clear, row clear
 		if (sum == expected) {
-			console.log('Clear Row');
 			clearFlag = true;
 			for (let z = 0; z < fields[0][0].length; z++) {
 				for (let x = 0; x < fields.length; x++) {
@@ -333,13 +345,10 @@ function rowClearCheck() {
 
 		// push the rows that weren't cleared and are floating down one
 		if (clearFlag) {
-			console.log("Shift Blocks");
 			for (let y2 = y+1; y2 < fields[0].length; y2++) {
 				for (let z2 = 0; z2 < fields[0][0].length; z2++) {
 					for (let x2 = 0; x2 < fields.length; x2++) {
 						if ((fields[x2][y2][z2] === Board.field.solidified) && (fields[x2][y2-1][z2] === Board.field.empty) ) {
-							console.log('here');
-							console.log(staticBlocks[x2][y2][z2]);
 							// remove current block from the scene
 							removeObjectFromScene(staticBlocks[x2][y2][z2]);
 							fields[x2][y2][z2] -= 2;
@@ -355,7 +364,6 @@ function rowClearCheck() {
 		}
 	}
 }
-
 
 function store() {
 
