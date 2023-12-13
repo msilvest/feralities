@@ -306,7 +306,6 @@ function rowClearCheck() {
 
 	// find the number of solid cells in each row
 	for (let z = 0; z < fields[0][0].length; z++) {
-		sum = 0;
 		for (let y = 0; y < fields[0].length; y++) {
 			for (let x = 0; x < fields.length; x++) {
 				if (fields[x][y][z] === Board.field.solidified) sum++;
@@ -346,6 +345,65 @@ function rowClearCheck() {
 		}
 	}
 }
+
+function rowClearCheck2() {
+	let fields = Board.fields;
+	let clearFlag = false;
+	let sum;
+
+	// number of a whole row of cells
+	let expected = fields.length * fields[0][0].length;
+	
+	// find the number of solid cells in each row
+	for (let y = 0; y < fields[0].length; y++) {
+		sum = 0;
+		console.log("New Row")
+		for (let z = 0; z < fields[0][0].length; z++) {
+			for (let x = 0; x < fields.length; x++) {
+				//console.log(fields[x][y][z]);
+				if (fields[x][y][z] === Board.field.solidified) {
+					sum++;
+				}
+			}
+		}
+
+		// if criteria has been met for row clear, row clear
+		if (sum == expected) {
+			clearFlag = true;
+			for (let z = 0; z < fields[0][0].length; z++) {
+				for (let x = 0; x < fields.length; x++) {
+					removeObjectFromScene(staticBlocks[x][y][z]);
+					fields[x][y][z] -= 2;
+					staticBlocks[x][y][z] = undefined;
+				}
+			}
+		}
+
+	// // push the rows that weren't cleared and are floating down one
+		// if (clearFlag) {
+		// 	for (let y2 = y; y2 < fields[0].length; y2++) {
+		// 		for (let z2 = 0; z2 < fields[0][0].length; z2++) {
+		// 			for (let x2 = 0; x < fields.length; x2++) {
+						
+		// 			}
+		// 		}
+		// 	}
+	// 	for (let z = 0; z < fields[0][0].length - 1; z++) {
+	// 		for (let y = 0; y < fields[0].length; y++) {
+	// 			for (let x = 0; x < fields.length; x++) {
+	// 				if (fields[x][y][z] === Board.field.solidified && !staticBlocks[x][y][z]) {
+	// 					createStaticBlocks(x, y, z);
+	// 				}
+	// 				if (fields[x][y][z] == Board.field.empty && staticBlocks[x][y][z]) {
+	// 					removeObjectFromScene(staticBlocks[x][y][z]);
+	// 					staticBlocks[x][y][z] = undefined;
+	// 				}
+	// 			}
+	// 		}
+	//}
+	}
+}
+
 
 function store() {
 
@@ -466,7 +524,7 @@ function setupButtons() {
 				sound.setBuffer( buffer );
 				sound.setLoop( true );
 				sound.setVolume( 0.5 );
-				sound.play();
+				//sound.play();
 
 				document.getElementById("start").remove();
 				document.getElementById("rotateX").style.visibility = "visible";
@@ -628,9 +686,23 @@ function main() {
 }
 
 main()
+for(var i = 0; i < gridDivisions; i++) {
+	for (var j = 0; j < gridDivisions; j++) {
+		createStaticBlocks(i,0,j);
+		Board.fields[i][0][j] = Board.field.solidified;
+		//console.log(staticBlocks[i][0][j]);
+	}
+}
+console.log(Board.fields[0][0][0]);
+console.log(staticBlocks[0][0][0]);
+rowClearCheck2();
+console.log(Board.fields[0][0][0]);
+console.log(staticBlocks[0][0][0]);
+
 // for(var i = 0; i < gridDivisions; i++) {
 // 	for (var j = 0; j < gridDivisions; j++) {
-// 		createStaticBlocks(i,0,j);
-// 		//console.log(staticBlocks[i][0][j]);
+// 		removeObjectFromScene(staticBlocks[i][0][j]);
 // 	}
 // }
+
+//createStaticBlocks(0,0,0);
