@@ -623,6 +623,9 @@ window.addEventListener('keydown', function (event) {
 		case "r":
 			store();
 			break;
+		
+		case "Enter":
+			while(movePiece(0, blockSpeed, 0));
     }
 }, false);
 
